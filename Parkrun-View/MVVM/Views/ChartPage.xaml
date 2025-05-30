@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Parkrun_View.MVVM.Views.ChartPage"
+             xmlns:microcharts="clr-namespace:Microcharts.Maui;assembly=Microcharts.Maui"
+             Title="">
+    
+    <Grid RowDefinitions="auto,1*">
+        <Border Stroke="Black" StrokeThickness="2" Background="LightGray" Padding="10" HorizontalOptions="Center"
+              IsVisible="{Binding IsToManyData}">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="20"/>
+            </Border.StrokeShape>
+
+            <HorizontalStackLayout Spacing="20" HorizontalOptions="Center" Grid.Row="0" >
+                <Label 
+                 Text="{Binding IsCompleteLabelName}" 
+                 FontSize="Small"
+                 VerticalOptions="Center" 
+                 TextColor="DarkBlue"/>
+
+                <Button 
+                 Text="Ansicht wechseln" 
+                 FontSize="Small"
+                 Command="{Binding ToggleViewModus}" 
+                 Background="SteelBlue" 
+                 TextColor="White" />
+            </HorizontalStackLayout>
+        </Border>
+
+        <ScrollView Orientation="Horizontal" Grid.Row="1" Margin="10" >
+            <microcharts:ChartView Chart="{Binding LineChart}" HeightRequest="{Binding ChartHeight}" WidthRequest="{Binding ChartWidth}" Margin="0,10,0,0"/>
+        </ScrollView>
+    </Grid>
+</ContentPage>

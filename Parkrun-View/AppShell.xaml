@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="Parkrun_View.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:Parkrun_View"
+    xmlns:views="clr-namespace:Parkrun_View.MVVM.Views"
+    Shell.FlyoutBehavior="Flyout"
+    Title="Parkrun_View">
+
+    <ShellContent
+        Title="Daten"
+        ContentTemplate="{DataTemplate views:ParkrunPage}"
+        Route="ParkrunPage" />
+
+    <ShellContent 
+        Title="Linien Diagramm"
+        ContentTemplate="{DataTemplate views:ChartPage}" 
+        Route="ChartPage" />
+
+    <ShellContent 
+        Title="Laufanalyse"
+        ContentTemplate="{DataTemplate views:RunningAnalysisPage}" 
+        Route="Laufanalyse" />
+
+</Shell>
