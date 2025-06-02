@@ -1,4 +1,5 @@
 ﻿using HtmlAgilityPack;
+using Parkrun_View.MVVM.Helpers;
 using Parkrun_View.MVVM.Models;
 using Parkrun_View.Services;
 using PropertyChanged;
@@ -176,17 +177,18 @@ namespace Parkrun_View.MVVM.ViewModels
             IsScrapping = true; // Setze den Status auf "Daten werden von der Webseite extrahiert"
             bool isScrapSuccess = false; // Variable, um den Erfolg des Scrappens zu verfolgen
 
-            List<string> parkrunLocations = UpdateParkrunLocations();
+            List<string> parkrunLocations = GetParkrunLocations();
 
-            List<string> UpdateParkrunLocations()
+            // Wandelt den String, wo alle Namen von den Parkrun-Standorten gespeichert sind, in eine Liste um.
+            List<string> GetParkrunLocations()
             {
                 // Mapping zwischen gespeicherter Schreibweise und gewünschtem Format. 
                 // Dient dazu, falls die Schreibweise der gespeicherten Parkrun-Standorte in den Preferences nicht mit der Schreibweise der URL übereinstimmt.
-                var nameMapping = new Dictionary<string, string>
-                {
-                    { "Prießnitzgrund", "priessnitzgrund" },
-                    // Weitere Namen können hier hinzugefügt werden
-                };
+                //var nameMapping = new Dictionary<string, string>
+                //{
+                //    { "Prießnitzgrund", "priessnitzgrund" },
+                //    // Weitere Namen können hier hinzugefügt werden
+                //};
 
                 // Gespeicherte Namen aus Preferences laden
                 var savedTracks = Preferences.Get("SelectedTracks", "").Split(',');
@@ -199,11 +201,7 @@ namespace Parkrun_View.MVVM.ViewModels
 
                 foreach (var savedTrack in savedTracks)
                 {
-                    // Falls ein Mapping existiert, verwende die umgewandelte Schreibweise
-                    if (nameMapping.ContainsKey(savedTrack))
-                        parkrunLocations.Add(nameMapping[savedTrack]);
-                    else
-                        parkrunLocations.Add(savedTrack.ToLower()); // Standard: in Kleinbuchstaben konvertieren
+                    parkrunLocations.Add(savedTrack);
                 }
 
                 return parkrunLocations;
@@ -312,17 +310,23 @@ namespace Parkrun_View.MVVM.ViewModels
 
             IsScrapping = false; // Setze den Status zurück, wenn die Datenextraktion abgeschlossen ist
 
+
+
             // Berechnet die Gesamtanzahl der Parkruns basierend auf dem Datum des ersten Parkruns in Deutschland
             int CalculateTotalRuns(string location)
             {
                 int extraRuns = 1; // Falls extra Läufe stattfanden. Normalerweise finden alle 7 Tage ein Parkrun statt, aber ich vermute, dass min. 1 extra Lauf stattfand. 
 
-                Dictionary<string, DateTime> firstParkrunDates = new Dictionary<string, DateTime>
-                {
-                    { "priessnitzgrund", new DateTime(2022, 7, 9) },    // Das Datum des ersten Parkruns im Prießnitzgrund in Dresden
-                    { "oberwald", new DateTime(2020, 10, 25) }          // Das Datum des ersten Parkruns im Oberwald in Deutschland
-                    // Weitere Standorte und deren erste Parkrun-Daten können hier hinzugefügt werden
-                };
+                //Dictionary<string, DateTime> firstParkrunDates = new Dictionary<string, DateTime>
+                //{
+                //    { "priessnitzgrund", new DateTime(2022, 7, 9) },    // Das Datum des ersten Parkruns im Prießnitzgrund in Dresden
+                //    { "oberwald", new DateTime(2020, 10, 25) }          // Das Datum des ersten Parkruns im Oberwald in Deutschland
+                //    // Weitere Standorte und deren erste Parkrun-Daten können hier hinzugefügt werden
+                //};
+                //Dictionary<string, DateTime> firstParkrunDates = ParkrunTracks.AvailableTracks.ToDictionary(track => track.TrackNameURL, track => track.FirstParkrunDate);
+                Dictionary<string, DateTime> firstParkrunDates = ParkrunTracks.AvailableTracks
+                .ToDictionary(track => string.IsNullOrEmpty(track.TrackNameURL) ? track.TrackName : track.TrackNameURL,
+                              track => track.FirstParkrunDate);
 
 
                 //var firstParkrunDate = new DateTime(2022, 7, 9); // Das Datum des ersten Parkruns in Deutschland beim Prießnitzgrund in der Heide in Dresden

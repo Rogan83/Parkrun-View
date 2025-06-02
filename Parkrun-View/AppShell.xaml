@@ -8,24 +8,29 @@
     Shell.FlyoutBehavior="Flyout"
     Title="Parkrun_View">
 
-    <ShellContent
-        Title="Daten"
-        ContentTemplate="{DataTemplate views:ParkrunPage}"
-        Route="ParkrunPage" />
+    <!-- Flyout-Elemente: Nur diese erscheinen im Menü -->
+    <FlyoutItem Title="Daten">
+        <ShellContent 
+            ContentTemplate="{DataTemplate views:ParkrunPage}" 
+            Route="ParkrunPage"/>
+    </FlyoutItem>
 
-    <ShellContent 
-        Title="Linien Diagramm"
-        ContentTemplate="{DataTemplate views:ChartPage}" 
-        Route="ChartPage" />
+    <FlyoutItem Title="Linien Diagramm">
+        <ShellContent 
+            ContentTemplate="{DataTemplate views:ChartPage}" 
+            Route="ChartPage"/>
+    </FlyoutItem>
 
+    <FlyoutItem Title="Laufanalyse">
+        <ShellContent 
+            ContentTemplate="{DataTemplate views:RunningAnalysisPage}" 
+            Route="Laufanalyse"/>
+    </FlyoutItem>
+
+    
+    
+    <!-- Einstellungen ist registriert, aber nicht im Flyout sichtbar -->
     <ShellContent 
-        Title="Einstellungen"
         ContentTemplate="{DataTemplate views:SettingsPage}" 
-        Route="SettingsPage" />
-
-    <ShellContent 
-        Title="Laufanalyse"
-        ContentTemplate="{DataTemplate views:RunningAnalysisPage}" 
-        Route="Laufanalyse" />
-
+        Route="SettingsPage"/>
 </Shell>

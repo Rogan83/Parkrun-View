@@ -1,4 +1,5 @@
-﻿using PropertyChanged;
+﻿using Parkrun_View.MVVM.Helpers;
+using PropertyChanged;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -12,22 +13,18 @@ namespace Parkrun_View.MVVM.ViewModels
     [AddINotifyPropertyChangedInterface]
     public class SettingsViewModel
     {
-        public ObservableCollection<TrackModel> AvailableTracks { get; } = new()
-        {
-            new TrackModel { Name = "Prießnitzgrund" },
-            new TrackModel { Name = "Oberwald" },
-        };
+        public ObservableCollection<TrackModel> AvailableTracks { get; } = new();
 
         public ICommand GoBack { get; } 
 
         public SettingsViewModel()
         {
+            AvailableTracks = ParkrunTracks.AvailableTracks; // Verweis auf die verfügbaren Strecken in ParkrunTracks
             // Initialisierung der Befehle
             GoBack = new Command(async() =>
             {
                 SaveSettings(); // Speichern der Einstellungen
                 await Shell.Current.GoToAsync("//ParkrunPage");
-            
             });
             
             LoadSettings();     // Laden der Einstellungen
@@ -36,8 +33,10 @@ namespace Parkrun_View.MVVM.ViewModels
         // Speichern der Einstellungen
         void SaveSettings()
         {
-            var selectedTracks = AvailableTracks.Where(t => t.IsSelected).Select(t => t.Name).ToList();
-            Preferences.Set("SelectedTracks", string.Join(",", selectedTracks));
+            var selectedTracks = AvailableTracks.Where(t => t.IsSelected)
+                .Select(t => string.IsNullOrEmpty(t.TrackNameURL) ? t.TrackName.ToLower() : t.TrackNameURL).ToList();
+            string selectedTracksString = selectedTracks.Count > 0 ? string.Join(",", selectedTracks) : string.Empty;
+            Preferences.Set("SelectedTracks", selectedTracksString);
         }
 
         // Laden der Einstellungen
@@ -47,14 +46,8 @@ namespace Parkrun_View.MVVM.ViewModels
 
             foreach (var track in AvailableTracks)
             {
-                track.IsSelected = savedTracks.Contains(track.Name);
+                track.IsSelected = savedTracks.Contains(track.TrackName.ToLower()) || savedTracks.Contains(track.TrackNameURL);
             }
         }
-    }
-
-    public class TrackModel
-    {
-        public string Name { get; set; }
-        public bool IsSelected { get; set; } // Bindung an CheckBox
     }
 }
