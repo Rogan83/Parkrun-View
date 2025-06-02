@@ -19,6 +19,11 @@
         Route="ChartPage" />
 
     <ShellContent 
+        Title="Einstellungen"
+        ContentTemplate="{DataTemplate views:SettingsPage}" 
+        Route="SettingsPage" />
+
+    <ShellContent 
         Title="Laufanalyse"
         ContentTemplate="{DataTemplate views:RunningAnalysisPage}" 
         Route="Laufanalyse" />

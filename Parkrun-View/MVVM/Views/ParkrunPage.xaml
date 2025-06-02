@@ -4,11 +4,21 @@
              xmlns:local="clr-namespace:Parkrun_View.MVVM.ViewModels"
              xmlns:microcharts="clr-namespace:Microcharts.Maui;assembly=Microcharts.Maui"
              x:Class="Parkrun_View.MVVM.Views.ParkrunPage"
-             Title="ParkrunPage">
-    <Grid RowDefinitions="auto,*,auto" Padding="10" ColumnDefinitions="1*,1*,1*" HorizontalOptions="Center" >
+             Title="">
+    <Grid RowDefinitions="auto,auto,*,auto" Padding="10" ColumnDefinitions="1*,1*,1*" HorizontalOptions="Center" >
+        <!-- Einstellungen Page -->
+        <ImageButton 
+            Grid.Row="0" 
+            Grid.ColumnSpan="3" 
+            HorizontalOptions="End" 
+            Margin="0,0,10,0"
+            Source="settings.png"
+            HeightRequest="20"
+            Command="{Binding GoToSettings}"
+            />
 
         <!-- Oberer Bereich für Datum und Zeitwahl -->
-        <HorizontalStackLayout Grid.Row="0" Grid.ColumnSpan="3" HorizontalOptions="Center">
+        <HorizontalStackLayout Grid.Row="1" Grid.ColumnSpan="3" HorizontalOptions="Center">
             <Grid ColumnDefinitions="1*,1*" Margin="5">
                 <Entry Text="{Binding ParkrunnerName}" Placeholder="Bitte Namen eintragen" Margin="10" 
                    HorizontalOptions="Start" Grid.Column="0"/>
@@ -60,7 +70,7 @@
 
         <!-- Datenanzeige -->
 
-        <ScrollView Grid.Row="1" Margin="0,20,0,20" Grid.ColumnSpan="3">
+        <ScrollView Grid.Row="2" Margin="0,20,0,20" Grid.ColumnSpan="3">
             <CollectionView ItemsSource="{Binding Data}" Margin="0,0,0,10">
                 <!-- Spaltenüberschriften -->
                 <CollectionView.Header>
@@ -84,10 +94,13 @@
         </ScrollView>
 
         <!--IsEnabled="{Binding IsScrappingButtonDisabled}"-->
-        <VerticalStackLayout Grid.Row="2" Grid.ColumnSpan="3">
+        <VerticalStackLayout Grid.Row="3" Grid.ColumnSpan="3">
             <Button Text="Aktualisiere die Datenbank" FontSize="Medium" TextColor="DarkRed" BackgroundColor="RosyBrown" WidthRequest="400"
-            Command="{Binding FetchDataFromWebsite}"  Grid.ColumnSpan="3" Margin="10" 
-            HorizontalOptions="Center" />
+                Command="{Binding FetchDataFromWebsite}"  Grid.ColumnSpan="3" Margin="10" 
+                HorizontalOptions="Center" />
+            <Button Text="Lösche die Datenbank" FontSize="Medium" TextColor="RosyBrown" BackgroundColor="DarkRed" WidthRequest="400"
+                Command="{Binding DeleteTableCommand}"  Grid.ColumnSpan="3" Margin="10" 
+                HorizontalOptions="Center" />
             <Label Text="{Binding ParkrunInfo}" BackgroundColor="MistyRose" TextColor="DarkRed" HorizontalOptions="Center"/>
         </VerticalStackLayout>
     </Grid>

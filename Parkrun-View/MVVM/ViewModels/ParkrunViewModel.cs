@@ -5,8 +5,10 @@ using PropertyChanged;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -57,6 +59,18 @@ namespace Parkrun_View.MVVM.ViewModels
         public ICommand FetchDataFromWebsite { get; }
         public ICommand LoadDataCommand { get; }
 
+        public ICommand DeleteTableCommand { get; }
+
+
+        public Command OpenChartPageCommand => new Command(async () =>
+        {
+            await Shell.Current.GoToAsync("///ChartPage");
+        });
+
+        public ICommand GoToSettings { get; } = new Command(async () =>
+        {
+            await Shell.Current.GoToAsync("//SettingsPage");
+        });
 
 
         string _parkrunnerName = string.Empty;
@@ -66,10 +80,6 @@ namespace Parkrun_View.MVVM.ViewModels
         private bool isDataLoaded = false;
         #endregion
 
-        public Command OpenChartPageCommand => new Command(async () =>
-        {
-            await Shell.Current.GoToAsync("///ChartPage");
-        });
 
 
         public async Task LoadDataAsync()
@@ -145,6 +155,11 @@ namespace Parkrun_View.MVVM.ViewModels
                 await LoadDataAsync();
             });
 
+            DeleteTableCommand = new Command(async () =>
+            {
+                DeleteTable();
+            });
+
 
             if (Preferences.Get("ParkrunnerName", string.Empty) != string.Empty)
             {
@@ -154,110 +169,176 @@ namespace Parkrun_View.MVVM.ViewModels
 
         public async Task ScrapeParkrunDataAsync(string searchName)
         {
-            //await DatabaseService.DeleteAllDataAsync();
-            //Data = new ObservableCollection<ParkrunData>();
-
             //suche aus der Datenbank den höchsten Parkrun Nr. und setze den Startwert für die Schleife
             var data = await DatabaseService.GetDataAsync();
             int nextParkrunNr = data.Any() ? data.Max(x => x.ParkrunNr + 1) : 1; //Holt sich die Nr. vom letzten Run von der Datenbank und addiere 1 dazu, so dass man mit der nächsten Seite, welche man scrappen will, fortsetzen kann. Falls die Datenbank keine Einträge hat, setze 1
 
             IsScrapping = true; // Setze den Status auf "Daten werden von der Webseite extrahiert"
-            ParkrunInfo = "Starte mit dem Exrahieren der Daten von der Webseite...";
+            bool isScrapSuccess = false; // Variable, um den Erfolg des Scrappens zu verfolgen
 
-            int totalRuns = CalculateTotalRuns();
+            List<string> parkrunLocations = UpdateParkrunLocations();
 
-            for (int run = nextParkrunNr; run <= totalRuns; run++)
+            List<string> UpdateParkrunLocations()
             {
-                string url = "https://www.parkrun.com.de/priessnitzgrund/results/" + run;
-                var htmlContent = await ScrapeSingleParkrunSiteAsync(url);
-                htmlContent = HttpUtility.HtmlDecode(htmlContent); // Wandelt HTML-Entity in lesbaren Text um
-                if (!string.IsNullOrEmpty(htmlContent))
+                // Mapping zwischen gespeicherter Schreibweise und gewünschtem Format. 
+                // Dient dazu, falls die Schreibweise der gespeicherten Parkrun-Standorte in den Preferences nicht mit der Schreibweise der URL übereinstimmt.
+                var nameMapping = new Dictionary<string, string>
                 {
-                    ParkrunInfo = "Extrahiere Seite " + run.ToString();  //Dient als Info für den User, von welcher Seite von der Webseite geladen werden.
+                    { "Prießnitzgrund", "priessnitzgrund" },
+                    // Weitere Namen können hier hinzugefügt werden
+                };
 
-                    // Parse den HTML-Inhalt mit HtmlAgilityPack
-                    var doc = new HtmlDocument();
-                    doc.LoadHtml(htmlContent);
+                // Gespeicherte Namen aus Preferences laden
+                var savedTracks = Preferences.Get("SelectedTracks", "").Split(',');
 
-                    var DateString = doc.DocumentNode.SelectSingleNode("//span[@class='format-date']")?.InnerHtml;
-                    if (!DateTime.TryParse(DateString ?? "", out DateTime date)) { date = new DateTime(); }
+                // Neue Liste mit aktualisierten Namen
+                List<string> parkrunLocations = new List<string>();
 
-                    var resultNode = doc.DocumentNode.SelectSingleNode("//tbody[@class='js-ResultsTbody']");
+                if (savedTracks[0] == string.Empty)
+                    return parkrunLocations;
 
-                    if (resultNode != null)
-                    {
-                        var dataFromWebsite = resultNode.SelectNodes(".//tr");
-                        if (dataFromWebsite == null) { return; }
-
-                        foreach (var trNode in dataFromWebsite) // Punkt vor `//tr` bedeutet "relativ zum aktuellen Node"
-                        {
-                            var parkrunNr = run;
-                            var name = trNode.GetAttributeValue("data-name", "Kein Name vorhanden"); // Wandelt HTML-Entity um
-                            //if (name.ToLower() != searchName.ToLower()) { continue; } // Hier wird der Name des Läufers gefiltert
-
-                            var ageGroup = trNode.GetAttributeValue("data-agegroup", "Keine Altersgruppe vorhanden");
-
-                            string genderText = trNode.InnerText.Trim();
-
-                            var gender = trNode.GetAttributeValue("data-gender", "kein Geschlecht angegeben.");
-
-                            if (!int.TryParse(trNode.GetAttributeValue("data-runs", "0"), out int runs)) { runs = 0; }
-
-                            string ageGradeString = trNode.GetAttributeValue("data-agegrade", "0");
-                            if (!float.TryParse(ageGradeString, CultureInfo.InvariantCulture, out float ageGrade)) { ageGrade = 0f; }
-
-                            var timeNode = trNode.SelectSingleNode(".//*[contains(@class, 'time')]");
-                            TimeSpan currentTime = FetchCurrentTime(timeNode);
-
-                            TimeSpan bestTime = FetchBestTime(timeNode);
-
-                            var parkrunData = new ParkrunData
-                            {
-                                ParkrunNr = parkrunNr,
-                                Date = date,
-                                Name = name,
-                                AgeGroup = ageGroup,
-                                Gender = gender,
-                                Runs = runs,
-                                AgeGrade = ageGrade,
-                                Time = currentTime,
-                                PersonalBest = bestTime,
-                                DistanceKm = 5
-                            };
-
-                            //if (name.ToLower() != searchName.ToLower())
-                            //    Data.Add(parkrunData);
-
-                            await DatabaseService.SaveDataAsync(parkrunData);
-                        }
-                    }
-                    int waitTime = new Random().Next(14, 20); // Zufällige Wartezeit 
-
-                    await Task.Delay(TimeSpan.FromSeconds(waitTime));
-                }
-                else
+                foreach (var savedTrack in savedTracks)
                 {
-                    break;
+                    // Falls ein Mapping existiert, verwende die umgewandelte Schreibweise
+                    if (nameMapping.ContainsKey(savedTrack))
+                        parkrunLocations.Add(nameMapping[savedTrack]);
+                    else
+                        parkrunLocations.Add(savedTrack.ToLower()); // Standard: in Kleinbuchstaben konvertieren
                 }
+
+                return parkrunLocations;
             }
+
+            if (parkrunLocations.Count > 0)
+                ParkrunInfo = "Starte mit dem Exrahieren der Daten von der Webseite...";
+            else
+                ParkrunInfo = "Keine Parkrun-Standorte ausgewählt. Bitte gehe zu den Einstellungen und wähle mindestens einen Parkrun-Standort aus.";
+
+
+            foreach (var location in parkrunLocations)
+            {
+                int totalRuns = CalculateTotalRuns(location);
+                for (int run = nextParkrunNr; run <= totalRuns; run++)
+                {
+                    string url = $"https://www.parkrun.com.de/{location}/results/{run}/";
+                    var htmlContent = await ScrapeSingleParkrunSiteAsync(url);
+                    htmlContent = HttpUtility.HtmlDecode(htmlContent); // Wandelt HTML-Entity in lesbaren Text um
+                    if (!string.IsNullOrEmpty(htmlContent))
+                    {
+                        ParkrunInfo = "Extrahiere Seite " + run.ToString();  //Dient als Info für den User, von welcher Seite von der Webseite geladen werden.
+
+                        // Parse den HTML-Inhalt mit HtmlAgilityPack
+                        var doc = new HtmlDocument();
+                        doc.LoadHtml(htmlContent);
+
+                        var DateString = doc.DocumentNode.SelectSingleNode("//span[@class='format-date']")?.InnerHtml;
+                        if (!DateTime.TryParse(DateString ?? "", out DateTime date)) { date = new DateTime(); }
+
+                        var resultNode = doc.DocumentNode.SelectSingleNode("//tbody[@class='js-ResultsTbody']");
+
+                        if (resultNode != null)
+                        {
+                            var dataFromWebsite = resultNode.SelectNodes(".//tr");
+                            if (dataFromWebsite == null) { return; }
+
+                            foreach (var trNode in dataFromWebsite) // Punkt vor `//tr` bedeutet "relativ zum aktuellen Node"
+                            {
+                                var parkrunNr = run;
+                                var name = trNode.GetAttributeValue("data-name", "Kein Name vorhanden"); // Wandelt HTML-Entity um
+                                                                                                            //if (name.ToLower() != searchName.ToLower()) { continue; } // Hier wird der Name des Läufers gefiltert
+                                var ageGroup = trNode.GetAttributeValue("data-agegroup", "Keine Altersgruppe vorhanden");
+
+                                string genderText = trNode.InnerText.Trim();
+
+                                var gender = trNode.GetAttributeValue("data-gender", "kein Geschlecht angegeben.");
+
+                                if (!int.TryParse(trNode.GetAttributeValue("data-runs", "0"), out int runs)) { runs = 0; }
+
+                                string ageGradeString = trNode.GetAttributeValue("data-agegrade", "0");
+                                if (!float.TryParse(ageGradeString, CultureInfo.InvariantCulture, out float ageGrade)) { ageGrade = 0f; }
+
+                                var timeNode = trNode.SelectSingleNode(".//*[contains(@class, 'time')]");
+                                TimeSpan currentTime = FetchCurrentTime(timeNode);
+
+                                TimeSpan bestTime = FetchBestTime(timeNode);
+
+                                var parkrunData = new ParkrunData
+                                {
+                                    CourseName = location, // Name der Laufstrecke
+                                    ParkrunNr = parkrunNr,
+                                    Date = date,
+                                    Name = name,
+                                    AgeGroup = ageGroup,
+                                    Gender = gender,
+                                    Runs = runs,
+                                    AgeGrade = ageGrade,
+                                    Time = currentTime,
+                                    PersonalBest = bestTime,
+                                    DistanceKm = 5
+                                };
+
+                                //if (name.ToLower() != searchName.ToLower())
+                                //    Data.Add(parkrunData);
+
+                                isScrapSuccess = true;
+
+                                await DatabaseService.SaveDataAsync(parkrunData);
+                            }
+                        }
+                        int waitTime = new Random().Next(14, 20); // Zufällige Wartezeit 
+
+                        await Task.Delay(TimeSpan.FromSeconds(waitTime));
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                if (nextParkrunNr >= totalRuns)
+                {
+                    ParkrunInfo = "Es sind keine neuen Daten vorhanden.";
+                }
+                else if (isScrapSuccess) // Wenn das Scrappen erfolgreich war
+                {
+                    int currentParkrunNr = nextParkrunNr - 1;
+                    ParkrunInfo = "Die Datenbank wurde erfolgreich aktualisiert. Es sind " + (totalRuns - currentParkrunNr) + " neue Daten vorhanden.";
+                }
+                else // Wenn das Scrappen nicht erfolgreich war
+                {
+                    ParkrunInfo = "Es konnte keine Verbindung zur Webseite aufgebaut werden.";
+                }
+            } // Ende der foreach-Schleife für die Parkrun-Standorte
+
             IsScrapping = false; // Setze den Status zurück, wenn die Datenextraktion abgeschlossen ist
 
-            if (nextParkrunNr >= totalRuns)
-            {
-                ParkrunInfo = "Es sind keine neuen Daten vorhanden.";
-            }
-            else
-            {
-                int currentParkrunNr = nextParkrunNr - 1;
-                ParkrunInfo = "Die Datenbank wurde erfolgreich aktualisiert. Es sind " + (totalRuns - currentParkrunNr) + " neue Daten vorhanden.";
-            }
-
             // Berechnet die Gesamtanzahl der Parkruns basierend auf dem Datum des ersten Parkruns in Deutschland
-            int CalculateTotalRuns()
+            int CalculateTotalRuns(string location)
             {
                 int extraRuns = 1; // Falls extra Läufe stattfanden. Normalerweise finden alle 7 Tage ein Parkrun statt, aber ich vermute, dass min. 1 extra Lauf stattfand. 
 
-                var firstParkrunDate = new DateTime(2022, 7, 9); // Das Datum des ersten Parkruns in Deutschland beim Prießnitzgrund in der Heide in Dresden
+                Dictionary<string, DateTime> firstParkrunDates = new Dictionary<string, DateTime>
+                {
+                    { "priessnitzgrund", new DateTime(2022, 7, 9) },    // Das Datum des ersten Parkruns im Prießnitzgrund in Dresden
+                    { "oberwald", new DateTime(2020, 10, 25) }          // Das Datum des ersten Parkruns im Oberwald in Deutschland
+                    // Weitere Standorte und deren erste Parkrun-Daten können hier hinzugefügt werden
+                };
+
+
+                //var firstParkrunDate = new DateTime(2022, 7, 9); // Das Datum des ersten Parkruns in Deutschland beim Prießnitzgrund in der Heide in Dresden
+                DateTime firstParkrunDate = DateTime.MinValue;
+                if (!firstParkrunDates.ContainsKey(location))
+                {
+                    Console.WriteLine("Der Standort '" + location + "' ist nicht in der Liste der Parkrun-Standorte enthalten.");
+                    return 0; // Wenn der Standort nicht gefunden wird, gebe 0 zurück
+                }
+                else
+                {
+                    firstParkrunDate = firstParkrunDates[location]; // Hole das Datum des ersten Parkruns für den angegebenen Standort
+                }
+                    
+
+
                 var currentDate = DateTime.Now.Date;
                 var daysSinceFirstParkrun = (currentDate - firstParkrunDate).TotalDays;
                 var totalRuns = (int)(daysSinceFirstParkrun / 7) + 1 + extraRuns; // Anzahl der Parkruns seit dem ersten Parkrun in Deutschland
@@ -295,6 +376,23 @@ namespace Parkrun_View.MVVM.ViewModels
                 if (!TimeSpan.TryParse(timeOnly ?? TimeSpan.Zero.ToString(), out TimeSpan bestTime)) { bestTime = TimeSpan.Zero; }
 
                 return bestTime;
+            }
+        }
+
+        public async void DeleteTable()
+        {
+            bool confirm = await Shell.Current.DisplayAlert(
+                    "Bestätigung",
+                    "Möchtest du wirklich alle Daten löschen?",
+                    "Ja",
+                    "Nein"
+                );
+
+            if (confirm)
+            {
+                await DatabaseService.DeleteAllDataAsync();
+                Data = new ObservableCollection<ParkrunData>();
+                pendingEntries.Clear(); // Leere die Warteschlange
             }
         }
 
@@ -359,12 +457,10 @@ namespace Parkrun_View.MVVM.ViewModels
                     catch (Exception ex)
                     {
                         Console.WriteLine($"Fehler beim Abrufen der Webseite: {ex.Message}");
-                        ParkrunInfo = $"Fehler beim Abrufen der Webseite: {ex.Message}";
-
-                        tryCount++;
+                        break;
+                        //tryCount++;
                     }
                 }
-                ParkrunInfo = "Fehler beim Abrufen der Webseite. Bitte später nochmal versuchen.";
             }
 
             return string.Empty;

@@ -21,8 +21,6 @@ namespace Parkrun_View.MVVM.Models
         public TimeSpan PersonalBest { get; set; } // Persönliche Bestzeit
         public TimeSpan PersonalWorst { get; set; } // Persönliche schlechteste Zeit
 
-
-
         public DateTime Date { get; set; }
         public TimeSpan Time { get; set; }
         public string CourseName { get; set; } = string.Empty;      // Name der Laufstrecke
