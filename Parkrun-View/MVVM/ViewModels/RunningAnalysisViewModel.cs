@@ -1,4 +1,5 @@
-﻿using Parkrun_View.MVVM.Models;
+﻿using Parkrun_View.MVVM.Helpers;
+using Parkrun_View.MVVM.Models;
 using PropertyChanged;
 using System;
 using System.Collections.Generic;
@@ -46,6 +47,8 @@ namespace Parkrun_View.MVVM.ViewModels
         public int WorstTimeInSeconds { get; set; }
 
         public ICommand CreateAnalysis { get; }
+
+        public ICommand GoToSettingsCommand { get; } = NavigationHelper.GoToSettingsCommand;
 
         public RunningAnalysisViewModel()
         {

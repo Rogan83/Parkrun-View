@@ -5,7 +5,7 @@
              xmlns:microcharts="clr-namespace:Microcharts.Maui;assembly=Microcharts.Maui"
              x:Class="Parkrun_View.MVVM.Views.ParkrunPage"
              Title="">
-    <Grid RowDefinitions="auto,auto,*,auto" Padding="10" ColumnDefinitions="1*,1*,1*" HorizontalOptions="Center" >
+    <Grid RowDefinitions="auto,auto,*,auto" Padding="0" ColumnDefinitions="1*,1*,1*" HorizontalOptions="Center" >
         <!-- Einstellungen Page -->
         <ImageButton 
             Grid.Row="0" 
@@ -14,7 +14,7 @@
             Margin="0,0,10,0"
             Source="settings.png"
             HeightRequest="20"
-            Command="{Binding GoToSettings}"
+            Command="{Binding GoToSettingsCommand}"
             />
 
         <!-- Oberer Bereich für Datum und Zeitwahl -->

@@ -7,7 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Microcharts;
-using SkiaSharp;        // Wird für die Grafiken benötigt
+using SkiaSharp;
+using Parkrun_View.MVVM.Helpers;        // Wird für die Grafiken benötigt
 
 namespace Parkrun_View.MVVM.ViewModels
 {
@@ -25,6 +26,12 @@ namespace Parkrun_View.MVVM.ViewModels
         bool isCompactView = false;
         public string IsCompleteLabelName { get; set; } = "Detailansicht"; // Label für die Ansicht
         public ICommand ToggleViewModus { get; set; }
+        //public ICommand GoToSettingsCommand { get; } = new Command(async () =>
+        //{
+        //    NavigationHelper.LastPageRoute = Shell.Current.CurrentState.Location.ToString();
+        //    await Shell.Current.GoToAsync("//SettingsPage");
+        //});
+        public ICommand GoToSettingsCommand { get; } = NavigationHelper.GoToSettingsCommand;
         public ChartViewModel()
         {
             LineChart = new LineChart();

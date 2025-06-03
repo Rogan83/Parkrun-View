@@ -2,99 +2,106 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Parkrun_View.MVVM.Views.RunningAnalysisPage"
-             Title="RunningAnalysisPage">
+             Title="">
+    <!--RunningAnalysisPage-->
     <VerticalStackLayout>
+        <ImageButton 
+            Grid.Row="0" 
+            Grid.ColumnSpan="3" 
+            HorizontalOptions="End" 
+            Margin="0,0,10,0"
+            Source="settings.png"
+            HeightRequest="20"
+            Command="{Binding GoToSettingsCommand}"
+        />
         <Label
-         Text="Wähle einen Lauf"
-         HorizontalOptions="Center"
-         TextDecorations="Underline"
-         FontSize="Large"
-         Margin="10"
+             Text="Wähle einen Lauf"
+             HorizontalOptions="Center"
+             TextDecorations="Underline"
+             FontSize="Large"
+             Margin="10"
          />
         <Picker 
-         HorizontalOptions="Center"
-         ItemsSource="{Binding Data}" 
-         SelectedItem="{Binding SelectedRun}" 
-         SelectedIndex="{Binding ParkrunIndex}"
-         HeightRequest="70"
-         BackgroundColor="SlateGray"
+             HorizontalOptions="Center"
+             ItemsSource="{Binding Data}" 
+             SelectedItem="{Binding SelectedRun}" 
+             SelectedIndex="{Binding ParkrunIndex}"
+             HeightRequest="70"
+             BackgroundColor="SlateGray"
          >
         </Picker>
 
-
         <Grid 
-         ColumnDefinitions="auto,auto,auto"
-         RowDefinitions="auto,auto,auto,auto"
-         HorizontalOptions="Center"
-         Margin="10"
-         >
+             ColumnDefinitions="auto,auto,auto"
+             RowDefinitions="auto,auto,auto,auto"
+             HorizontalOptions="Center"
+             Margin="10"
+            >
             <VerticalStackLayout 
-             Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Margin="30" 
-             HorizontalOptions="Center">
+                 Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Margin="30" 
+                 HorizontalOptions="Center">
+                    <Label 
+                     Text="Ausgewählte Laufzeit" 
+                     FontAttributes="Bold" 
+                     TextDecorations="Underline"
+                     TextColor="DarkRed"
+                     FontSize="Medium"
+                     />
                 <Label 
-                 Text="Ausgewählte Laufzeit" 
-                 FontAttributes="Bold" 
-                 TextDecorations="Underline"
-                 TextColor="DarkRed"
-                 FontSize="Medium"
-                 />
-                <Label 
-                 Text= "{Binding KmH, StringFormat='{0:F2} Km/H'}"
-                 HorizontalOptions="Center"
-                 TextColor="RosyBrown"
-                 FontSize="Medium"
-                 />
+                     Text= "{Binding KmH, StringFormat='{0:F2} Km/H'}"
+                     HorizontalOptions="Center"
+                     TextColor="RosyBrown"
+                     FontSize="Medium"
+                     />
             </VerticalStackLayout>
 
             <VerticalStackLayout 
-             Grid.Row="1" Grid.Column="0" Margin="5"
-             Grid.ColumnSpan="3" HorizontalOptions="Center">
+                 Grid.Row="1" Grid.Column="0" Margin="5"
+                 Grid.ColumnSpan="3" HorizontalOptions="Center">
+                    <Label 
+                     Text="Anzahl gelaufener Strecken" 
+                     FontAttributes="Bold" 
+                     TextDecorations="Underline"
+                     HorizontalOptions="Center"
+                     />
                 <Label 
-                 Text="Anzahl gelaufener Strecken" 
-                 FontAttributes="Bold" 
-                 TextDecorations="Underline"
-                 HorizontalOptions="Center"
-                 />
-                <Label 
-                 Text= "{Binding NumberOfRuns}"
-                 HorizontalOptions="Center"
-                 TextColor="SaddleBrown"
-                 />
+                     Text= "{Binding NumberOfRuns}"
+                     HorizontalOptions="Center"
+                     TextColor="SaddleBrown"
+                     />
             </VerticalStackLayout>
 
             <VerticalStackLayout 
-             Grid.Row="2" Grid.Column="0" Margin="5">
+                 Grid.Row="2" Grid.Column="0" Margin="5">
+                    <Label 
+                     Text="max km/h" 
+                     FontAttributes="Bold" 
+                     TextDecorations="Underline"
+                     HorizontalOptions="Center"
+                     />
                 <Label 
-                 Text="max km/h" 
-                 FontAttributes="Bold" 
-                 TextDecorations="Underline"
-                 HorizontalOptions="Center"
-                 />
-                <Label 
-                 Text= "{Binding MaxKmH, StringFormat='{0:F2}'}"
-                 HorizontalOptions="Center"
-                 TextColor="SaddleBrown"
-                 />
+                     Text= "{Binding MaxKmH, StringFormat='{0:F2}'}"
+                     HorizontalOptions="Center"
+                     TextColor="SaddleBrown"
+                     />
             </VerticalStackLayout>
 
-            <VerticalStackLayout 
-             Grid.Row="2" Grid.Column="1" Margin="5">
+            <VerticalStackLayout Grid.Row="2" Grid.Column="1" Margin="5">
                 <Label 
-                 Text="min km/h" 
-                 FontAttributes="Bold" 
-                 TextDecorations="Underline"
-                 HorizontalOptions="Center"
-                 />
+                    Text="min km/h" 
+                    FontAttributes="Bold" 
+                    TextDecorations="Underline"
+                    HorizontalOptions="Center"
+                    />
                 <Label 
-                 Text= "{Binding MinKmH, StringFormat='{0:F2}'}"
-                 HorizontalOptions="Center"
-                 TextColor="SaddleBrown"
-                 />
+                     Text= "{Binding MinKmH, StringFormat='{0:F2}'}"
+                     HorizontalOptions="Center"
+                     TextColor="SaddleBrown"
+                     />
             </VerticalStackLayout>
 
 
-            <VerticalStackLayout 
-             Grid.Row="3" Grid.Column="0" Margin="5">
+            <VerticalStackLayout Grid.Row="3" Grid.Column="0" Margin="5">
                 <Label 
                      Text="schnellste Zeit" 
                      FontAttributes="Bold" 
@@ -103,20 +110,20 @@
                  />
                 <HorizontalStackLayout HorizontalOptions="Center">
                     <Label 
-                     Text= "{Binding BestTimeInHours, StringFormat='{0:00}:'}"
-                     HorizontalOptions="Center"
-                     TextColor="SaddleBrown"
-                 />
+                         Text= "{Binding BestTimeInHours, StringFormat='{0:00}:'}"
+                         HorizontalOptions="Center"
+                         TextColor="SaddleBrown"
+                    />
                     <Label 
-                     Text= "{Binding BestTimeInMinutes, StringFormat='{0:00}:'}"
-                     HorizontalOptions="Center"
-                     TextColor="SaddleBrown"
-                 />
+                         Text= "{Binding BestTimeInMinutes, StringFormat='{0:00}:'}"
+                         HorizontalOptions="Center"
+                         TextColor="SaddleBrown"
+                     />
                     <Label 
-                     Text= "{Binding BestTimeInSeconds, StringFormat='{0:00}'}"
-                     HorizontalOptions="Center"
-                     TextColor="SaddleBrown"
-                 />
+                         Text= "{Binding BestTimeInSeconds, StringFormat='{0:00}'}"
+                         HorizontalOptions="Center"
+                         TextColor="SaddleBrown"
+                    />
                 </HorizontalStackLayout>
             </VerticalStackLayout>
 

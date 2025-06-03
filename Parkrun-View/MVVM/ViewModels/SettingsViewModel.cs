@@ -24,7 +24,15 @@ namespace Parkrun_View.MVVM.ViewModels
             GoBack = new Command(async() =>
             {
                 SaveSettings(); // Speichern der Einstellungen
-                await Shell.Current.GoToAsync("//ParkrunPage");
+
+                if (!string.IsNullOrEmpty(NavigationHelper.LastPageRoute))
+                {
+                    await Shell.Current.GoToAsync(NavigationHelper.LastPageRoute);
+                }
+                else
+                {
+                    await Shell.Current.GoToAsync("//ParkrunPage"); // Falls keine vorige Seite bekannt ist
+                }
             });
             
             LoadSettings();     // Laden der Einstellungen

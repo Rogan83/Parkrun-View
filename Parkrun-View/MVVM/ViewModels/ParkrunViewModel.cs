@@ -68,19 +68,13 @@ namespace Parkrun_View.MVVM.ViewModels
             await Shell.Current.GoToAsync("///ChartPage");
         });
 
-        public ICommand GoToSettings { get; } = new Command(async () =>
-        {
-            await Shell.Current.GoToAsync("//SettingsPage");
-        });
-
+        public ICommand GoToSettingsCommand { get; } = NavigationHelper.GoToSettingsCommand;
 
         string _parkrunnerName = string.Empty;
 
 
-
         private bool isDataLoaded = false;
         #endregion
-
 
 
         public async Task LoadDataAsync()
@@ -172,7 +166,6 @@ namespace Parkrun_View.MVVM.ViewModels
         {
             //suche aus der Datenbank den höchsten Parkrun Nr. und setze den Startwert für die Schleife
             var data = await DatabaseService.GetDataAsync();
-            int nextParkrunNr = data.Any() ? data.Max(x => x.ParkrunNr + 1) : 1; //Holt sich die Nr. vom letzten Run von der Datenbank und addiere 1 dazu, so dass man mit der nächsten Seite, welche man scrappen will, fortsetzen kann. Falls die Datenbank keine Einträge hat, setze 1
 
             IsScrapping = true; // Setze den Status auf "Daten werden von der Webseite extrahiert"
             bool isScrapSuccess = false; // Variable, um den Erfolg des Scrappens zu verfolgen
@@ -215,7 +208,12 @@ namespace Parkrun_View.MVVM.ViewModels
 
             foreach (var location in parkrunLocations)
             {
+                int nextParkrunNr = data.Any(x => x.CourseName == location) ? data
+                    .Where(x => x.CourseName == location)
+                    .Max(x => x.ParkrunNr + 1) : 1; //Holt sich die Nr. vom letzten Run von der Datenbank und addiere 1 dazu, so dass man mit der nächsten Seite, welche man scrappen will, fortsetzen kann. Falls die Datenbank keine Einträge hat, setze 1
+
                 int totalRuns = CalculateTotalRuns(location);
+                totalRuns = 2; //test
                 for (int run = nextParkrunNr; run <= totalRuns; run++)
                 {
                     string url = $"https://www.parkrun.com.de/{location}/results/{run}/";
@@ -325,7 +323,7 @@ namespace Parkrun_View.MVVM.ViewModels
                 //};
                 //Dictionary<string, DateTime> firstParkrunDates = ParkrunTracks.AvailableTracks.ToDictionary(track => track.TrackNameURL, track => track.FirstParkrunDate);
                 Dictionary<string, DateTime> firstParkrunDates = ParkrunTracks.AvailableTracks
-                .ToDictionary(track => string.IsNullOrEmpty(track.TrackNameURL) ? track.TrackName : track.TrackNameURL,
+                .ToDictionary(track => string.IsNullOrEmpty(track.TrackNameURL) ? track.TrackName.ToLower() : track.TrackNameURL,
                               track => track.FirstParkrunDate);
 
 
