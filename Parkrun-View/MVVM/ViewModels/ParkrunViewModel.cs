@@ -208,8 +208,8 @@ namespace Parkrun_View.MVVM.ViewModels
 
             foreach (var location in parkrunLocations)
             {
-                int nextParkrunNr = data.Any(x => x.CourseName == location) ? data
-                    .Where(x => x.CourseName == location)
+                int nextParkrunNr = data.Any(x => x.TrackName == location) ? data
+                    .Where(x => x.TrackName == location)
                     .Max(x => x.ParkrunNr + 1) : 1; //Holt sich die Nr. vom letzten Run von der Datenbank und addiere 1 dazu, so dass man mit der nächsten Seite, welche man scrappen will, fortsetzen kann. Falls die Datenbank keine Einträge hat, setze 1
 
                 int totalRuns = CalculateTotalRuns(location);
@@ -260,7 +260,7 @@ namespace Parkrun_View.MVVM.ViewModels
 
                                 var parkrunData = new ParkrunData
                                 {
-                                    CourseName = location, // Name der Laufstrecke
+                                    TrackName = location, // Name der Laufstrecke
                                     ParkrunNr = parkrunNr,
                                     Date = date,
                                     Name = name,
@@ -277,13 +277,15 @@ namespace Parkrun_View.MVVM.ViewModels
                                 //    Data.Add(parkrunData);
 
                                 isScrapSuccess = true;
-
+                                
                                 await DatabaseService.SaveDataAsync(parkrunData);
                             }
                         }
+
                         int waitTime = new Random().Next(14, 20); // Zufällige Wartezeit 
 
-                        await Task.Delay(TimeSpan.FromSeconds(waitTime));
+                        if (run < totalRuns)
+                            await Task.Delay(TimeSpan.FromSeconds(waitTime));
                     }
                     else
                     {

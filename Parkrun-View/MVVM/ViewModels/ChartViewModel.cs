@@ -8,7 +8,8 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Microcharts;
 using SkiaSharp;
-using Parkrun_View.MVVM.Helpers;        // Wird für die Grafiken benötigt
+using Parkrun_View.MVVM.Helpers;
+using Parkrun_View.Services;        // Wird für die Grafiken benötigt
 
 namespace Parkrun_View.MVVM.ViewModels
 {
@@ -16,7 +17,32 @@ namespace Parkrun_View.MVVM.ViewModels
     internal class ChartViewModel
     {
         public List<ParkrunData> Data { get; set; } = new List<ParkrunData>();
+        public List<ParkrunData> DataPeriod { get; set; } = new List<ParkrunData>();        // Daten, die für die aktuelle Periode ausgewählt wurden
         public Chart LineChart { get; private set; }
+
+        private DateTime dateStart;
+
+        public DateTime DateStart 
+        { 
+            get => dateStart; 
+            set 
+            {
+                dateStart = value;
+                FilterDataByDate();
+            } 
+        }
+
+        private DateTime dateEnd;
+
+        public DateTime DateEnd
+        {
+            get => dateEnd;
+            set
+            {
+                dateEnd = value;
+                FilterDataByDate();
+            }
+        }
 
         public int ChartWidth { get; set; }
         int maxChartWidth = 0;               // Maximale Breite, die der Linechart haben darf, damit die Infos zu jeden Datenpunkt vollständig zu sehen sind.
@@ -26,13 +52,9 @@ namespace Parkrun_View.MVVM.ViewModels
         bool isCompactView = false;
         public string IsCompleteLabelName { get; set; } = "Detailansicht"; // Label für die Ansicht
         public ICommand ToggleViewModus { get; set; }
-        //public ICommand GoToSettingsCommand { get; } = new Command(async () =>
-        //{
-        //    NavigationHelper.LastPageRoute = Shell.Current.CurrentState.Location.ToString();
-        //    await Shell.Current.GoToAsync("//SettingsPage");
-        //});
+      
         public ICommand GoToSettingsCommand { get; } = NavigationHelper.GoToSettingsCommand;
-        public ChartViewModel()
+        public ChartViewModel(DateTime dateStart = default)
         {
             LineChart = new LineChart();
 
@@ -46,7 +68,7 @@ namespace Parkrun_View.MVVM.ViewModels
             });
 
             DeviceDisplay.Current.MainDisplayInfoChanged += OnDisplayChanged;
-
+            DateStart = dateStart;
         }
         //Wird ausgerufen, wenn das DisplayInfo sich ändert, z.B. bei der Drehung des Bildschirms
         void OnDisplayChanged(object? sender, DisplayInfoChangedEventArgs e)
@@ -56,6 +78,7 @@ namespace Parkrun_View.MVVM.ViewModels
         }
 
         int expandedChartWidth = 0; // Breite der Detailansicht
+
         public void UpdateChartDimensions()
         {
             int adjustedWidth = 0;
@@ -132,7 +155,7 @@ namespace Parkrun_View.MVVM.ViewModels
         public void UpdateChart()
         {
             List<ChartEntry> entries;
-            if (Data.Count == 0)
+            if (DataPeriod.Count == 0)
             {
                 entries = new List<ChartEntry>
                 {
@@ -143,11 +166,11 @@ namespace Parkrun_View.MVVM.ViewModels
             {
                 string label = string.Empty;
                 string valueLabel = string.Empty;
-                Data = Data.OrderBy(d => d.Date).ToList();
+                DataPeriod = DataPeriod.OrderBy(d => d.Date).ToList();
 
-                var maxTime = Data.Max(d => d.Time.TotalSeconds); // Höchster Wert bestimmen
-                var minTime = Data.Min(d => d.Time.TotalSeconds); // Niedrigsten Wert bestimmen
-                entries = Data.Select((result, index) =>
+                var maxTime = DataPeriod.Max(d => d.Time.TotalSeconds); // Höchster Wert bestimmen
+                var minTime = DataPeriod.Min(d => d.Time.TotalSeconds); // Niedrigsten Wert bestimmen
+                entries = DataPeriod.Select((result, index) =>
                 {
                     float calculatedValue = (float)(maxTime - result.Time.TotalSeconds);
 
@@ -203,6 +226,33 @@ namespace Parkrun_View.MVVM.ViewModels
                 //MaxValue = 1000,  // Höchster Wert ein wenig über deinem höchsten Punkt setzen
                 //MinValue = 0   // Niedrigster Wert nahe deinem kleinsten Punkt setzen
             };
+        }
+        bool isInitPeriod = false; // Flag, ob die Periode bereits initialisiert wurde
+        public void InitPeriod()
+        {
+            if (Data.Count == 0)
+            {
+                DateStart = DateTime.Now;
+                DateEnd = DateTime.Now;
+                return;
+            }
+            DateStart = Data.Min(d => d.Date);
+            DateEnd = Data.Max(d => d.Date);
+            isInitPeriod = true; // Periode wurde initialisiert
+        }
+
+        void FilterDataByDate()
+        {
+            if (!isInitPeriod) // Wenn die Periode noch nicht initialisiert wurde, dann wird sie initialisiert
+            {
+                return;
+            }
+
+            if (Data.Count > 0)
+            {
+                DataPeriod = Data.Where(d => d.Date >= DateStart && d.Date <= DateEnd).ToList();
+                UpdateChart();
+            }
         }
     }
 }

@@ -6,15 +6,34 @@
              Title="">
     
     <Grid RowDefinitions="auto,auto,1*">
-        <ImageButton 
-            Grid.Row="0" 
-            Grid.ColumnSpan="3" 
-            HorizontalOptions="End" 
-            Margin="0,0,10,0"
-            Source="settings.png"
-            HeightRequest="20"
-            Command="{Binding GoToSettingsCommand}"
-            />
+        <VerticalStackLayout  Grid.Row="0" >
+            <ImageButton 
+                Grid.ColumnSpan="3" 
+                HorizontalOptions="End" 
+                Margin="0,0,10,0"
+                Source="settings.png"
+                HeightRequest="20"
+                Command="{Binding GoToSettingsCommand}"
+                />
+            <Label Text="Wählen Sie einen Zeitraum aus"
+                   TextDecorations="Underline"
+                   FontSize="Title"
+                   HorizontalOptions="Center"/>
+            
+            <HorizontalStackLayout HorizontalOptions="Center">
+                <VerticalStackLayout Margin="10">
+                    <Label Text="Von" HorizontalOptions="Center"/>
+                    <DatePicker
+                        Date="{Binding DateStart}"/>
+                </VerticalStackLayout>
+                <VerticalStackLayout Margin="10">
+                    <Label Text="Bis" HorizontalOptions="Center"/>
+                    <DatePicker
+                        Date="{Binding DateEnd}"/>
+                </VerticalStackLayout>
+            </HorizontalStackLayout>
+        </VerticalStackLayout>
+        
         <Border Grid.Row="1" Stroke="Black" StrokeThickness="2" Background="LightGray" Padding="10" HorizontalOptions="Center"
               IsVisible="{Binding IsToManyData}">
             <Border.StrokeShape>

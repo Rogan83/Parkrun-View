@@ -2,6 +2,7 @@ using Parkrun_View.MVVM.Models;
 using Parkrun_View.MVVM.ViewModels;
 using Parkrun_View.Services;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace Parkrun_View.MVVM.Views;
 
@@ -31,11 +32,23 @@ public partial class ChartPage : ContentPage
                 {
                     parkrunnerName = Preferences.Get("ParkrunnerName", string.Empty);
                 }
-                var filteredData = data.Where(x => x.Name.ToLower() == parkrunnerName);
 
-                chartViewModel.Data = new ObservableCollection<ParkrunData>(filteredData).ToList();
+                // Filter nun die Daten von allen Standorten, die in den Einstellungen ausgewählt wurden
+                string[] tracks = Preferences.Get("SelectedTracks", string.Empty).Split(",");
+                List<ParkrunData> filteredDataByTrack = new List<ParkrunData>();
+                foreach (var track in tracks)
+                {
+                    var temp = data.Where(x => x.TrackName.ToLower() == track.ToLower());
+                    filteredDataByTrack.AddRange(temp);
+                }
+
+                // Filter nur die Daten vom Namen des Parkrunners heraus
+                var filteredData = filteredDataByTrack.Where(x => x.Name.ToLower() == parkrunnerName);
+
+                chartViewModel.DataPeriod = chartViewModel.Data = new ObservableCollection<ParkrunData>(filteredData).ToList();
                 chartViewModel.UpdateChartDimensions();
                 chartViewModel.UpdateChart();
+                chartViewModel.InitPeriod();
             }
         }
     }
