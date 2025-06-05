@@ -5,22 +5,26 @@
              Title="">
     <!--RunningAnalysisPage-->
     <VerticalStackLayout>
-        <ImageButton 
-            Grid.Row="0" 
-            Grid.ColumnSpan="3" 
-            HorizontalOptions="End" 
-            Margin="0,0,10,0"
-            Source="settings.png"
-            HeightRequest="20"
-            Command="{Binding GoToSettingsCommand}"
-        />
-        <Label
-             Text="Wähle einen Lauf"
-             HorizontalOptions="Center"
-             TextDecorations="Underline"
-             FontSize="Large"
-             Margin="10"
-         />
+        <Grid ColumnDefinitions="1000*,*" HorizontalOptions="Fill">
+            <Label
+                 Grid.Column="0"
+                 Text="Wähle einen Lauf"
+                 HorizontalOptions="Center"
+                 TextDecorations="Underline"
+                 FontSize="Large"
+                 Margin="10"
+             />
+            <ImageButton 
+                Grid.Column="1"
+                Source="settings.png"
+                HeightRequest="20"
+                WidthRequest="20"
+                Margin="10"
+                HorizontalOptions="End" 
+                Command="{Binding GoToSettingsCommand}"
+            />
+
+        </Grid>
         <Picker 
              HorizontalOptions="Center"
              ItemsSource="{Binding Data}" 
@@ -31,27 +35,20 @@
          >
         </Picker>
 
-        <Grid 
-             ColumnDefinitions="auto,auto,auto"
-             RowDefinitions="auto,auto,auto,auto"
-             HorizontalOptions="Center"
-             Margin="10"
-            >
+        <FlexLayout
+             Direction="Row" Wrap="Wrap" JustifyContent="SpaceAround" AlignItems="Center" Margin="0,40,0,0">
             <VerticalStackLayout 
-                 Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Margin="30" 
+                  Margin="5" 
                  HorizontalOptions="Center">
                     <Label 
                      Text="Ausgewählte Laufzeit" 
                      FontAttributes="Bold" 
                      TextDecorations="Underline"
-                     TextColor="DarkRed"
-                     FontSize="Medium"
                      />
                 <Label 
                      Text= "{Binding KmH, StringFormat='{0:F2} Km/H'}"
                      HorizontalOptions="Center"
-                     TextColor="RosyBrown"
-                     FontSize="Medium"
+                     TextColor="SaddleBrown"
                      />
             </VerticalStackLayout>
 
@@ -72,7 +69,7 @@
             </VerticalStackLayout>
 
             <VerticalStackLayout 
-                 Grid.Row="2" Grid.Column="0" Margin="5">
+                 Margin="5">
                     <Label 
                      Text="max km/h" 
                      FontAttributes="Bold" 
@@ -86,7 +83,7 @@
                      />
             </VerticalStackLayout>
 
-            <VerticalStackLayout Grid.Row="2" Grid.Column="1" Margin="5">
+            <VerticalStackLayout  Margin="5">
                 <Label 
                     Text="min km/h" 
                     FontAttributes="Bold" 
@@ -101,7 +98,7 @@
             </VerticalStackLayout>
 
 
-            <VerticalStackLayout Grid.Row="3" Grid.Column="0" Margin="5">
+            <VerticalStackLayout  Margin="5">
                 <Label 
                      Text="schnellste Zeit" 
                      FontAttributes="Bold" 
@@ -128,7 +125,7 @@
             </VerticalStackLayout>
 
             <VerticalStackLayout 
-             Grid.Row="3" Grid.Column="1" Margin="5">
+             Margin="5">
                 <Label 
                      Text="langsamste Zeit" 
                      FontAttributes="Bold" 
@@ -153,7 +150,7 @@
                  />
                 </HorizontalStackLayout>
             </VerticalStackLayout>
-        </Grid>
+        </FlexLayout>
 
     </VerticalStackLayout>
 </ContentPage>

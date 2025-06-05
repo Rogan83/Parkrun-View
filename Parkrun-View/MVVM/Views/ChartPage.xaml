@@ -5,33 +5,44 @@
              xmlns:microcharts="clr-namespace:Microcharts.Maui;assembly=Microcharts.Maui"
              Title="">
     
-    <Grid RowDefinitions="auto,auto,1*">
+    <Grid RowDefinitions="auto,auto,auto">
         <VerticalStackLayout  Grid.Row="0" >
-            <ImageButton 
-                Grid.ColumnSpan="3" 
-                HorizontalOptions="End" 
-                Margin="0,0,10,0"
-                Source="settings.png"
-                HeightRequest="20"
-                Command="{Binding GoToSettingsCommand}"
-                />
-            <Label Text="Wählen Sie einen Zeitraum aus"
-                   TextDecorations="Underline"
-                   FontSize="Title"
-                   HorizontalOptions="Center"/>
-            
-            <HorizontalStackLayout HorizontalOptions="Center">
-                <VerticalStackLayout Margin="10">
+            <Grid ColumnDefinitions="3*,1*" HorizontalOptions="Center">
+                <!--<Label 
+                    Grid.Column="0"
+                    Margin="10"
+                        Text="Wählen Sie einen Zeitraum aus" 
+                       TextDecorations="Underline"
+                       FontSize="Title"
+                       HorizontalOptions="Center"/>-->
+
+            </Grid>
+
+            <Grid ColumnDefinitions="*,*,auto" HorizontalOptions="Fill">
+                <!-- Erste Spalte: Startdatum -->
+                <VerticalStackLayout Margin="10" Grid.Column="0">
                     <Label Text="Von" HorizontalOptions="Center"/>
-                    <DatePicker
-                        Date="{Binding DateStart}"/>
+                    <DatePicker Date="{Binding DateStart}" HorizontalOptions="Center"/>
                 </VerticalStackLayout>
-                <VerticalStackLayout Margin="10">
+
+                <!-- Zweite Spalte: Enddatum -->
+                <VerticalStackLayout Margin="10" Grid.Column="1">
                     <Label Text="Bis" HorizontalOptions="Center"/>
-                    <DatePicker
-                        Date="{Binding DateEnd}"/>
+                    <DatePicker Date="{Binding DateEnd}" HorizontalOptions="Center"/>
                 </VerticalStackLayout>
-            </HorizontalStackLayout>
+
+                <!-- Dritte Spalte: Einstellungen-Button -->
+                <ImageButton Grid.Column="2"
+        HorizontalOptions="End" 
+        HeightRequest="40"
+        WidthRequest="40"
+        Margin="0,0,10,0"
+        Source="settings.png"
+        Command="{Binding GoToSettingsCommand}"
+        />
+            </Grid>
+
+
         </VerticalStackLayout>
         
         <Border Grid.Row="1" Stroke="Black" StrokeThickness="2" Background="LightGray" Padding="10" HorizontalOptions="Center"

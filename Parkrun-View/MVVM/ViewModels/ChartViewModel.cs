@@ -63,7 +63,7 @@ namespace Parkrun_View.MVVM.ViewModels
                 isCompactView = !isCompactView;
                 IsCompleteLabelName = isCompactView ? "Kompaktansicht" : "Detailansicht";
 
-                UpdateChartDimensions(); // Breite aktualisieren
+                //UpdateChartDimensions(); // Breite aktualisieren
                 UpdateChart();
             });
 
@@ -73,80 +73,12 @@ namespace Parkrun_View.MVVM.ViewModels
         //Wird ausgerufen, wenn das DisplayInfo sich ändert, z.B. bei der Drehung des Bildschirms
         void OnDisplayChanged(object? sender, DisplayInfoChangedEventArgs e)
         {
-            UpdateChartDimensions(); // Aktualisiert die Breite auch nach dem drehen des Bildschirms
+            //UpdateChartDimensions(); // Aktualisiert die Breite auch nach dem drehen des Bildschirms
             UpdateChart();
         }
 
         int expandedChartWidth = 0; // Breite der Detailansicht
 
-        public void UpdateChartDimensions()
-        {
-            int adjustedWidth = 0;
-            int dataPointWidth = 100;
-
-            int adjustedHeight = 0;
-
-            if (DeviceInfo.Platform == DevicePlatform.Android || DeviceInfo.Platform == DevicePlatform.iOS)
-            {
-                CalculateAdjustedDimensionsForSmartphone();
-                ChartHeight = (int)(adjustedHeight * 0.5f);
-            }
-            else if (DeviceInfo.Platform == DevicePlatform.WinUI || DeviceInfo.Platform == DevicePlatform.MacCatalyst)
-            {
-                CalculateAdjustedDimensionsForPC();
-                ChartHeight = (int)(adjustedHeight * 0.6f);
-
-                dataPointWidth = 150;
-            }
-            maxChartWidth = adjustedWidth;  // Maximale Breite, die der Linechart haben darf, damit alle Infos zu jeden Datenpunkt vollständig auf eine Seite zu sehen sind für die kompakte Ansicht.
-
-            expandedChartWidth = Data.Count * dataPointWidth;   // Die Gesamtbreite des Diagramms, welches mit einem horizontalen Balken angeschaut werden kann, wird anhand der Anzahl der Datenpunkte und der Breite pro Datenpunkt berechnet.
-
-            if (isCompactView)
-            {
-                ChartWidth = adjustedWidth; // Maximale Breite für die vollständige Ansicht
-            }
-            else
-            {
-                // Mindestbreite festlegen und je nach Datenzahl skalieren
-                ChartWidth = Math.Max(adjustedWidth, expandedChartWidth);  // Pro Datenpunkt 50 Pixel Breite
-            }
-
-            // Wenn die Anzahl der Datenpunkte und die daraus resultierende Gesamtbreite für das Liniendiagramm zu hoch ist,
-            // dann wird der Button sichtbar, wo man in einer kompakten Ansicht wechseln kann,
-            // wo aber kein Datenpunkt mehr beschriftet ist.
-            IsToManyData = expandedChartWidth > maxChartWidth ? true : false;
-
-            void CalculateAdjustedDimensionsForSmartphone()
-            {
-                double screenWidth = DeviceDisplay.Current.MainDisplayInfo.Width; // Bildschirmbreite in Pixel
-                double screenHeight = DeviceDisplay.Current.MainDisplayInfo.Height; // Bildschirmhöhe in Pixel
-                double density = DeviceDisplay.Current.MainDisplayInfo.Density; // Pixeldichte
-
-                adjustedWidth = (int)(screenWidth / density); // Berechnete Breite in DP
-                adjustedHeight = (int)(screenHeight / density); // Berechnete Höhe in DP
-            }
-
-            void CalculateAdjustedDimensionsForPC()
-            {
-                var width = Application.Current?.Windows.FirstOrDefault()?.Width;
-                if (width != null)
-                    adjustedWidth = (int)width; // Breite des aktuellen Fensters
-                else
-                    adjustedWidth = 1000;
-
-                var height = Application.Current?.Windows.FirstOrDefault()?.Height;
-
-                if (height != null)
-                {
-                    adjustedHeight = (int)height; // Höhe des aktuellen Fensters
-                }
-                else
-                {
-                    adjustedHeight = 250;
-                }
-            }
-        }
 
 
         /// <summary>
@@ -154,6 +86,8 @@ namespace Parkrun_View.MVVM.ViewModels
         /// </summary>
         public void UpdateChart()
         {
+            UpdateChartDimensions(); // Breite aktualisieren
+
             List<ChartEntry> entries;
             if (DataPeriod.Count == 0)
             {
@@ -205,7 +139,7 @@ namespace Parkrun_View.MVVM.ViewModels
             }
 
             #region TestData
-            ///
+            
             //var entries = new List<ChartEntry>
             //{
 
@@ -226,7 +160,80 @@ namespace Parkrun_View.MVVM.ViewModels
                 //MaxValue = 1000,  // Höchster Wert ein wenig über deinem höchsten Punkt setzen
                 //MinValue = 0   // Niedrigster Wert nahe deinem kleinsten Punkt setzen
             };
+
+
+            void UpdateChartDimensions()
+            {
+                int adjustedWidth = 0;
+                int dataPointWidth = 100;
+
+                int adjustedHeight = 0;
+
+                if (DeviceInfo.Platform == DevicePlatform.Android || DeviceInfo.Platform == DevicePlatform.iOS)
+                {
+                    CalculateAdjustedDimensionsForSmartphone();
+                    ChartHeight = (int)(adjustedHeight * 0.5f);
+                }
+                else if (DeviceInfo.Platform == DevicePlatform.WinUI || DeviceInfo.Platform == DevicePlatform.MacCatalyst)
+                {
+                    CalculateAdjustedDimensionsForPC();
+                    ChartHeight = (int)(adjustedHeight * 0.6f);
+
+                    dataPointWidth = 150;
+                }
+                maxChartWidth = adjustedWidth;  // Maximale Breite, die der Linechart haben darf, damit alle Infos zu jeden Datenpunkt vollständig auf eine Seite zu sehen sind für die kompakte Ansicht.
+
+                expandedChartWidth = Data.Count * dataPointWidth;   // Die Gesamtbreite des Diagramms, welches mit einem horizontalen Balken angeschaut werden kann, wird anhand der Anzahl der Datenpunkte und der Breite pro Datenpunkt berechnet.
+
+                if (isCompactView)
+                {
+                    ChartWidth = adjustedWidth; // Maximale Breite für die vollständige Ansicht
+                }
+                else
+                {
+                    // Mindestbreite festlegen und je nach Datenzahl skalieren
+                    ChartWidth = Math.Max(adjustedWidth, expandedChartWidth);  // Pro Datenpunkt 50 Pixel Breite
+                }
+
+                // Wenn die Anzahl der Datenpunkte und die daraus resultierende Gesamtbreite für das Liniendiagramm zu hoch ist,
+                // dann wird der Button sichtbar, wo man in einer kompakten Ansicht wechseln kann,
+                // wo aber kein Datenpunkt mehr beschriftet ist.
+                IsToManyData = expandedChartWidth > maxChartWidth ? true : false;
+
+                void CalculateAdjustedDimensionsForSmartphone()
+                {
+                    double screenWidth = DeviceDisplay.Current.MainDisplayInfo.Width; // Bildschirmbreite in Pixel
+                    double screenHeight = DeviceDisplay.Current.MainDisplayInfo.Height; // Bildschirmhöhe in Pixel
+                    double density = DeviceDisplay.Current.MainDisplayInfo.Density; // Pixeldichte
+
+                    adjustedWidth = (int)(screenWidth / density); // Berechnete Breite in DP
+                    adjustedHeight = (int)(screenHeight / density); // Berechnete Höhe in DP
+                }
+
+                void CalculateAdjustedDimensionsForPC()
+                {
+                    var width = Application.Current?.Windows.FirstOrDefault()?.Width;
+                    if (width != null)
+                        adjustedWidth = (int)width; // Breite des aktuellen Fensters
+                    else
+                        adjustedWidth = 1000;
+
+                    var height = Application.Current?.Windows.FirstOrDefault()?.Height;
+
+                    if (height != null)
+                    {
+                        adjustedHeight = (int)height; // Höhe des aktuellen Fensters
+                    }
+                    else
+                    {
+                        adjustedHeight = 250;
+                    }
+                }
+            }
+
+
         }
+
         bool isInitPeriod = false; // Flag, ob die Periode bereits initialisiert wurde
         public void InitPeriod()
         {

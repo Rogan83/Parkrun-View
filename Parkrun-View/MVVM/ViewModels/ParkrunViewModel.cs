@@ -150,7 +150,7 @@ namespace Parkrun_View.MVVM.ViewModels
                 await LoadDataAsync();
             });
 
-            DeleteTableCommand = new Command(async () =>
+            DeleteTableCommand = new Command(() =>
             {
                 DeleteTable();
             });

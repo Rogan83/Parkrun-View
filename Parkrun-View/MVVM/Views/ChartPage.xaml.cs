@@ -46,7 +46,7 @@ public partial class ChartPage : ContentPage
                 var filteredData = filteredDataByTrack.Where(x => x.Name.ToLower() == parkrunnerName);
 
                 chartViewModel.DataPeriod = chartViewModel.Data = new ObservableCollection<ParkrunData>(filteredData).ToList();
-                chartViewModel.UpdateChartDimensions();
+                //chartViewModel.UpdateChartDimensions();
                 chartViewModel.UpdateChart();
                 chartViewModel.InitPeriod();
             }

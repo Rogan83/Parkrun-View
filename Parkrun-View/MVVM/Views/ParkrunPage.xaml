@@ -9,11 +9,12 @@
         <!-- Einstellungen Page -->
         <ImageButton 
             Grid.Row="0" 
-            Grid.ColumnSpan="3" 
-            HorizontalOptions="End" 
+            Grid.Column="2"
             Margin="0,0,10,0"
-            Source="settings.png"
+            HorizontalOptions="End"
             HeightRequest="20"
+            WidthRequest="20"
+            Source="settings.png"
             Command="{Binding GoToSettingsCommand}"
             />
 

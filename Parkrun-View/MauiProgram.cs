@@ -1,5 +1,6 @@
 ﻿using Microcharts.Maui;
 using Microsoft.Extensions.Logging;
+using SkiaSharp.Views.Maui.Controls.Hosting;
 
 namespace Parkrun_View
 {
@@ -10,6 +11,7 @@ namespace Parkrun_View
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
+                .UseSkiaSharp()  
                 .UseMicrocharts()
                 .ConfigureFonts(fonts =>
                 {
