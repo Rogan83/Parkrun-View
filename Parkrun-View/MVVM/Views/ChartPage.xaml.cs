@@ -24,6 +24,8 @@ public partial class ChartPage : ContentPage
     {
         if (BindingContext is ChartViewModel chartViewModel)
         {
+            chartViewModel.FontSize = Preferences.Get("selectedFontSize", 16.0); // Schriftgröße aus den Einstellungen laden
+
             var data = DatabaseService.GetDataSync();
             if (data != null)
             {

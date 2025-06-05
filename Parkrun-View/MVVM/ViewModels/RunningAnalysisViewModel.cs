@@ -17,7 +17,7 @@ namespace Parkrun_View.MVVM.ViewModels
 
         public ParkrunData SelectedRun { get; set; } = new ParkrunData();
 
-
+        public double FontSize { get; set; } = 16;
 
         private int parkrunIndex;
         public int ParkrunIndex

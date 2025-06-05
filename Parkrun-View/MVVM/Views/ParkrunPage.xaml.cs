@@ -24,6 +24,7 @@ public partial class ParkrunPage : ContentPage
     {
         if (BindingContext is ParkrunViewModel parkrunViewModel)
         {
+            parkrunViewModel.FontSize = Preferences.Get("selectedFontSize", 16.0); // Schriftgröße aus den Einstellungen laden
             var data = DatabaseService.GetDataSync();
             if (data != null)
             {

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:local="clr-namespace:Parkrun_View.MVVM.ViewModels"
+             xmlns:viewModels="clr-namespace:Parkrun_View.MVVM.ViewModels"
              xmlns:microcharts="clr-namespace:Microcharts.Maui;assembly=Microcharts.Maui"
              x:Class="Parkrun_View.MVVM.Views.ParkrunPage"
              Title="">
@@ -22,9 +22,9 @@
         <HorizontalStackLayout Grid.Row="1" Grid.ColumnSpan="3" HorizontalOptions="Center">
             <Grid ColumnDefinitions="1*,1*" Margin="5">
                 <Entry Text="{Binding ParkrunnerName}" Placeholder="Bitte Namen eintragen" Margin="10" 
-                   HorizontalOptions="Start" Grid.Column="0"/>
+                   HorizontalOptions="Start" Grid.Column="0" FontSize="{Binding FontSize}"/>
                 <Button Text ="Lade Daten"  Command="{Binding LoadDataCommand}" Margin="10" BackgroundColor ="Green" 
-                    HorizontalOptions="Start" Grid.Column="1"/>
+                    HorizontalOptions="Start" Grid.Column="1" FontSize="{Binding FontSize}"/>
             </Grid>
         </HorizontalStackLayout>
 
@@ -76,18 +76,20 @@
                 <!-- Spaltenüberschriften -->
                 <CollectionView.Header>
                     <Grid ColumnDefinitions="1*,1*" Margin="5">
-                        <Label Text="Datum:" FontAttributes="Bold" FontSize="Medium" Grid.Column="0" HorizontalOptions="Center" 
-                               TextDecorations="Underline"/>
-                        <Label Text="Zeit:" FontAttributes="Bold" FontSize="Medium" Grid.Column="1" HorizontalOptions="Center" 
-                               TextDecorations="Underline"/>
+                        <Label Text="Datum:" FontAttributes="Bold"  Grid.Column="0" HorizontalOptions="Center" 
+                               TextDecorations="Underline" FontSize="{Binding Source={RelativeSource AncestorType={x:Type viewModels:ParkrunViewModel}},Path=FontSize}"/>
+                        <Label Text="Zeit:" FontAttributes="Bold"  Grid.Column="1" HorizontalOptions="Center" 
+                               TextDecorations="Underline" FontSize="{Binding Source={RelativeSource AncestorType={x:Type viewModels:ParkrunViewModel}},Path=FontSize}"/>
                     </Grid>
                 </CollectionView.Header>
 
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
                         <Grid ColumnDefinitions="1*,1*" Margin="5">
-                            <Label Text="{Binding Date, StringFormat='{0:dd.MM.yyyy}'}" Grid.Column="0" Margin="10" HorizontalOptions="Center"/>
-                            <Label Text="{Binding Time}" Grid.Column="1" Margin="10" HorizontalOptions="Center"/>
+                            <Label Text="{Binding Date, StringFormat='{0:dd.MM.yyyy}'}" Grid.Column="0" Margin="10" HorizontalOptions="Center" 
+                                   FontSize="{Binding Source={RelativeSource AncestorType={x:Type viewModels:ParkrunViewModel}},Path=FontSize}"/>
+                            <Label Text="{Binding Time}" Grid.Column="1" Margin="10" HorizontalOptions="Center" 
+                                   FontSize="{Binding Source={RelativeSource AncestorType={x:Type viewModels:ParkrunViewModel}},Path=FontSize}"/>
                         </Grid>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
@@ -96,13 +98,13 @@
 
         <!--IsEnabled="{Binding IsScrappingButtonDisabled}"-->
         <VerticalStackLayout Grid.Row="3" Grid.ColumnSpan="3">
-            <Button Text="Aktualisiere die Datenbank" FontSize="Medium" TextColor="DarkRed" BackgroundColor="RosyBrown" WidthRequest="400"
-                Command="{Binding FetchDataFromWebsite}"  Grid.ColumnSpan="3" Margin="10" 
+            <Button Text="Aktualisiere die Datenbank"  TextColor="DarkRed" BackgroundColor="RosyBrown" WidthRequest="400"
+                Command="{Binding FetchDataFromWebsite}"  Grid.ColumnSpan="3" Margin="10"  FontSize="{Binding FontSize}"
                 HorizontalOptions="Center" />
-            <Button Text="Lösche die Datenbank" FontSize="Medium" TextColor="RosyBrown" BackgroundColor="DarkRed" WidthRequest="400"
-                Command="{Binding DeleteTableCommand}"  Grid.ColumnSpan="3" Margin="10" 
+            <Button Text="Lösche die Datenbank"  TextColor="RosyBrown" BackgroundColor="DarkRed" WidthRequest="400"
+                Command="{Binding DeleteTableCommand}"  Grid.ColumnSpan="3" Margin="10" FontSize="{Binding FontSize}"
                 HorizontalOptions="Center" />
-            <Label Text="{Binding ParkrunInfo}" BackgroundColor="MistyRose" TextColor="DarkRed" HorizontalOptions="Center"/>
+            <Label Text="{Binding ParkrunInfo}" BackgroundColor="MistyRose" TextColor="DarkRed" HorizontalOptions="Center" FontSize="{Binding FontSize}"/>
         </VerticalStackLayout>
     </Grid>
 </ContentPage>

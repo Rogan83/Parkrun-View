@@ -26,6 +26,7 @@ namespace Parkrun_View.MVVM.ViewModels
         public ObservableCollection<ParkrunData> Data { get; set; } = new();
         private List<ParkrunData> pendingEntries = new();
 
+        public double FontSize { get; set; } = 16;
         public DateTime SelectedDate { get; set; } = DateTime.Now.Date;
 
         public List<int> Hours { get; } = Enumerable.Range(0, 24).ToList();

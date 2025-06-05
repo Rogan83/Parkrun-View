@@ -20,6 +20,8 @@ namespace Parkrun_View.MVVM.ViewModels
         public List<ParkrunData> DataPeriod { get; set; } = new List<ParkrunData>();        // Daten, die für die aktuelle Periode ausgewählt wurden
         public Chart LineChart { get; private set; }
 
+        public double FontSize { get; set; } = 16;
+
         private DateTime dateStart;
 
         public DateTime DateStart 
@@ -155,7 +157,7 @@ namespace Parkrun_View.MVVM.ViewModels
                 Entries = entries,
                 LabelOrientation = Orientation.Horizontal,
                 ValueLabelOrientation = Orientation.Horizontal,
-                LabelTextSize = 30,
+                LabelTextSize = (float)FontSize * 2,
 
                 //MaxValue = 1000,  // Höchster Wert ein wenig über deinem höchsten Punkt setzen
                 //MinValue = 0   // Niedrigster Wert nahe deinem kleinsten Punkt setzen

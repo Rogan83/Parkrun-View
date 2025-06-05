@@ -22,6 +22,7 @@ public partial class RunningAnalysisPage : ContentPage
     {
         if (BindingContext is RunningAnalysisViewModel runningAnalysisViewModel)
         {
+            runningAnalysisViewModel.FontSize = Preferences.Get("selectedFontSize", 16.0); // Schriftgröße aus den Einstellungen laden
             var data = DatabaseService.GetDataSync();
             if (data != null)
             {

@@ -40,15 +40,17 @@
             <VerticalStackLayout 
                   Margin="5" 
                  HorizontalOptions="Center">
-                    <Label 
+                <Label 
                      Text="Ausgewählte Laufzeit" 
                      FontAttributes="Bold" 
                      TextDecorations="Underline"
+                     FontSize="{Binding FontSize}"
                      />
                 <Label 
-                     Text= "{Binding KmH, StringFormat='{0:F2} Km/H'}"
-                     HorizontalOptions="Center"
-                     TextColor="SaddleBrown"
+                    Text= "{Binding KmH, StringFormat='{0:F2} Km/H'}"
+                    HorizontalOptions="Center"
+                    TextColor="SaddleBrown"
+                    FontSize="{Binding FontSize}"
                      />
             </VerticalStackLayout>
 
@@ -60,11 +62,13 @@
                      FontAttributes="Bold" 
                      TextDecorations="Underline"
                      HorizontalOptions="Center"
+                     FontSize="{Binding FontSize}"
                      />
                 <Label 
-                     Text= "{Binding NumberOfRuns}"
-                     HorizontalOptions="Center"
-                     TextColor="SaddleBrown"
+                    Text= "{Binding NumberOfRuns}"
+                    HorizontalOptions="Center"
+                    TextColor="SaddleBrown"
+                    FontSize="{Binding FontSize}"
                      />
             </VerticalStackLayout>
 
@@ -75,11 +79,13 @@
                      FontAttributes="Bold" 
                      TextDecorations="Underline"
                      HorizontalOptions="Center"
+                     FontSize="{Binding FontSize}"
                      />
                 <Label 
-                     Text= "{Binding MaxKmH, StringFormat='{0:F2}'}"
-                     HorizontalOptions="Center"
-                     TextColor="SaddleBrown"
+                    Text= "{Binding MaxKmH, StringFormat='{0:F2}'}"
+                    HorizontalOptions="Center"
+                    TextColor="SaddleBrown"
+                    FontSize="{Binding FontSize}"
                      />
             </VerticalStackLayout>
 
@@ -89,11 +95,13 @@
                     FontAttributes="Bold" 
                     TextDecorations="Underline"
                     HorizontalOptions="Center"
+                    FontSize="{Binding FontSize}"
                     />
                 <Label 
-                     Text= "{Binding MinKmH, StringFormat='{0:F2}'}"
-                     HorizontalOptions="Center"
-                     TextColor="SaddleBrown"
+                    Text= "{Binding MinKmH, StringFormat='{0:F2}'}"
+                    HorizontalOptions="Center"
+                    TextColor="SaddleBrown"
+                    FontSize="{Binding FontSize}"
                      />
             </VerticalStackLayout>
 
@@ -104,22 +112,26 @@
                      FontAttributes="Bold" 
                      TextDecorations="Underline"
                      HorizontalOptions="Center"
+                    FontSize="{Binding FontSize}"
                  />
                 <HorizontalStackLayout HorizontalOptions="Center">
                     <Label 
                          Text= "{Binding BestTimeInHours, StringFormat='{0:00}:'}"
                          HorizontalOptions="Center"
                          TextColor="SaddleBrown"
+                        FontSize="{Binding FontSize}"
                     />
                     <Label 
                          Text= "{Binding BestTimeInMinutes, StringFormat='{0:00}:'}"
                          HorizontalOptions="Center"
                          TextColor="SaddleBrown"
+                        FontSize="{Binding FontSize}"
                      />
                     <Label 
                          Text= "{Binding BestTimeInSeconds, StringFormat='{0:00}'}"
                          HorizontalOptions="Center"
                          TextColor="SaddleBrown"
+                        FontSize="{Binding FontSize}"
                     />
                 </HorizontalStackLayout>
             </VerticalStackLayout>
@@ -131,22 +143,26 @@
                      FontAttributes="Bold" 
                      TextDecorations="Underline"
                      HorizontalOptions="Center"
+                    FontSize="{Binding FontSize}"
                  />
                 <HorizontalStackLayout HorizontalOptions="Center">
                     <Label 
-                     Text= "{Binding WorstTimeInHours, StringFormat='{0:00}:'}"
-                     HorizontalOptions="Center"
-                     TextColor="SaddleBrown"
+                         Text= "{Binding WorstTimeInHours, StringFormat='{0:00}:'}"
+                         HorizontalOptions="Center"
+                         TextColor="SaddleBrown"
+                        FontSize="{Binding FontSize}"
                  />
                     <Label 
-                     Text= "{Binding WorstTimeInMinutes, StringFormat='{0:00}:'}"
-                     HorizontalOptions="Center"
-                     TextColor="SaddleBrown"
+                         Text= "{Binding WorstTimeInMinutes, StringFormat='{0:00}:'}"
+                         HorizontalOptions="Center"
+                         TextColor="SaddleBrown"
+                        FontSize="{Binding FontSize}"
                  />
                     <Label 
-                     Text= "{Binding WorstTimeInSeconds, StringFormat='{0:00}'}"
-                     HorizontalOptions="Center"
-                     TextColor="SaddleBrown"
+                         Text= "{Binding WorstTimeInSeconds, StringFormat='{0:00}'}"
+                         HorizontalOptions="Center"
+                         TextColor="SaddleBrown"
+                        FontSize="{Binding FontSize}"
                  />
                 </HorizontalStackLayout>
             </VerticalStackLayout>

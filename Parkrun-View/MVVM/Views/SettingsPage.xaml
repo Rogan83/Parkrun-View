@@ -2,26 +2,48 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Parkrun_View.MVVM.Views.SettingsPage"
+             xmlns:viewModels="clr-namespace:Parkrun_View.MVVM.ViewModels"
              Title="Einstellungen">
+
     <VerticalStackLayout>
         <Label Text="Wähle hier deine Strecken aus" HorizontalOptions="Center" Margin="10" FontSize="Large"/>
-        <CollectionView ItemsSource="{Binding AvailableTracks}" Margin="20">
-            <CollectionView.ItemTemplate>
-                <DataTemplate>
-                    <Grid ColumnDefinitions="*,*,*">
+        <ScrollView>
+            <CollectionView ItemsSource="{Binding AvailableTracks}" Margin="20">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
                         <FlexLayout Grid.Column="1" Direction="Row" AlignItems="Center" 
-                                    JustifyContent="SpaceBetween" Margin="0,0,0,10">
+                                        JustifyContent="SpaceBetween" Margin="0,0,0,10">
                             <CheckBox IsChecked="{Binding IsSelected}" />
-                            <Label Text="{Binding TrackName}" />
+                            <Label  Text="{Binding TrackName}"
+                                    Margin="20"
+                                    FontSize="{Binding Source={RelativeSource AncestorType={x:Type viewModels:SettingsViewModel}},Path=FontSize}" />
+
                         </FlexLayout>
-                    </Grid>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </ScrollView>
+
+        <Label 
+            HorizontalOptions="Center"
+            Text="Schriftgröße"
+            FontSize="Large"/>
+        <Picker 
+            Margin="10"
+            ItemsSource="{Binding FontSizes}" 
+            SelectedItem="{Binding SelectedFontSize}" 
+            HorizontalOptions="Center"
+            WidthRequest="200"
+            BackgroundColor="SlateGray"
+            FontSize="{Binding FontSize}"
+            />
+
 
         <Button 
+            Margin="10"
             Text="Zurück"
             Command="{Binding GoBack}"
+            FontSize="{Binding FontSize}"
             HorizontalOptions="Center" />
     </VerticalStackLayout>
 </ContentPage>

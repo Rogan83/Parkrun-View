@@ -18,28 +18,28 @@
 
             </Grid>
 
-            <Grid ColumnDefinitions="*,*,auto" HorizontalOptions="Fill">
+            <Grid ColumnDefinitions="10*,10*,*" HorizontalOptions="Fill">
                 <!-- Erste Spalte: Startdatum -->
-                <VerticalStackLayout Margin="10" Grid.Column="0">
-                    <Label Text="Von" HorizontalOptions="Center"/>
-                    <DatePicker Date="{Binding DateStart}" HorizontalOptions="Center"/>
-                </VerticalStackLayout>
+                <HorizontalStackLayout Grid.Column="0" HorizontalOptions="Center">
+                    <Label Text="Von:" HorizontalOptions="Center" FontSize="{Binding FontSize}" Grid.Column="0" VerticalOptions="Center" Margin="10"/>
+                    <DatePicker Date="{Binding DateStart}" FontSize="{Binding FontSize}" Grid.Column="1" HorizontalOptions="Start"/>
+                </HorizontalStackLayout>
 
                 <!-- Zweite Spalte: Enddatum -->
-                <VerticalStackLayout Margin="10" Grid.Column="1">
-                    <Label Text="Bis" HorizontalOptions="Center"/>
-                    <DatePicker Date="{Binding DateEnd}" HorizontalOptions="Center"/>
-                </VerticalStackLayout>
+                <HorizontalStackLayout Grid.Column="1">
+                    <Label Text="Bis:" HorizontalOptions="Center" FontSize="{Binding FontSize}" Grid.Column="2" VerticalOptions="Center" Margin="10"/>
+                    <DatePicker Date="{Binding DateEnd}" FontSize="{Binding FontSize}" Grid.Column="3" HorizontalOptions="Start"/>
+                </HorizontalStackLayout>
 
                 <!-- Dritte Spalte: Einstellungen-Button -->
-                <ImageButton Grid.Column="2"
-        HorizontalOptions="End" 
-        HeightRequest="40"
-        WidthRequest="40"
-        Margin="0,0,10,0"
-        Source="settings.png"
-        Command="{Binding GoToSettingsCommand}"
-        />
+                <ImageButton Grid.Column="4"
+                    HorizontalOptions="End" 
+                    HeightRequest="40"
+                    WidthRequest="40"
+                    Margin="0,0,10,0"
+                    Source="settings.png"
+                    Command="{Binding GoToSettingsCommand}"
+                    />
             </Grid>
 
 
@@ -53,17 +53,17 @@
 
             <HorizontalStackLayout Spacing="20" HorizontalOptions="Center" Grid.Row="0" >
                 <Label 
-                 Text="{Binding IsCompleteLabelName}" 
-                 FontSize="Small"
-                 VerticalOptions="Center" 
-                 TextColor="DarkBlue"/>
+                     Text="{Binding IsCompleteLabelName}" 
+                     FontSize="{Binding FontSize}"
+                     VerticalOptions="Center" 
+                     TextColor="DarkBlue"/>
 
                 <Button 
-                 Text="Ansicht wechseln" 
-                 FontSize="Small"
-                 Command="{Binding ToggleViewModus}" 
-                 Background="SteelBlue" 
-                 TextColor="White" />
+                     Text="Ansicht wechseln" 
+                     FontSize="{Binding FontSize}"
+                     Command="{Binding ToggleViewModus}" 
+                     Background="SteelBlue" 
+                     TextColor="White" />
             </HorizontalStackLayout>
         </Border>
 
