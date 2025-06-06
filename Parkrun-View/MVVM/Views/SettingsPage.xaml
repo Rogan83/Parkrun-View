@@ -26,7 +26,7 @@
 
         <Label 
             HorizontalOptions="Center"
-            Text="Schriftgröße"
+            Text="Schriftgröße auswählen"
             FontSize="Large"/>
         <Picker 
             Margin="10"
@@ -41,7 +41,7 @@
 
         <Button 
             Margin="10"
-            Text="Zurück"
+            Text="Einstellungen übernehmen"
             Command="{Binding GoBack}"
             FontSize="{Binding FontSize}"
             HorizontalOptions="Center" />

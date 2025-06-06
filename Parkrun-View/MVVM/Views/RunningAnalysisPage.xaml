@@ -41,7 +41,7 @@
                   Margin="5" 
                  HorizontalOptions="Center">
                 <Label 
-                     Text="Ausgewählte Laufzeit" 
+                     Text="Ausgewähltes Rennen" 
                      FontAttributes="Bold" 
                      TextDecorations="Underline"
                      FontSize="{Binding FontSize}"

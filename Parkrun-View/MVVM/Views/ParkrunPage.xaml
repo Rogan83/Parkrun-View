@@ -5,28 +5,24 @@
              xmlns:microcharts="clr-namespace:Microcharts.Maui;assembly=Microcharts.Maui"
              x:Class="Parkrun_View.MVVM.Views.ParkrunPage"
              Title="">
-    <Grid RowDefinitions="auto,auto,*,auto" Padding="0" ColumnDefinitions="1*,1*,1*" HorizontalOptions="Center" >
-        <!-- Einstellungen Page -->
-        <ImageButton 
-            Grid.Row="0" 
-            Grid.Column="2"
-            Margin="0,0,10,0"
-            HorizontalOptions="End"
-            HeightRequest="20"
-            WidthRequest="20"
-            Source="settings.png"
-            Command="{Binding GoToSettingsCommand}"
-            />
-
-        <!-- Oberer Bereich für Datum und Zeitwahl -->
-        <HorizontalStackLayout Grid.Row="1" Grid.ColumnSpan="3" HorizontalOptions="Center">
-            <Grid ColumnDefinitions="1*,1*" Margin="5">
+    <Grid RowDefinitions="auto,*,auto" Padding="0" ColumnDefinitions="1*,1*,1*" HorizontalOptions="Center" >
+            <Grid ColumnDefinitions="1*,1*,auto" Margin="5" HorizontalOptions="Fill" Grid.ColumnSpan="3">
+                <!-- Oberer Bereich für Datum und Zeitwahl -->
                 <Entry Text="{Binding ParkrunnerName}" Placeholder="Bitte Namen eintragen" Margin="10" 
-                   HorizontalOptions="Start" Grid.Column="0" FontSize="{Binding FontSize}"/>
+                   HorizontalOptions="Center" Grid.Column="0" FontSize="{Binding FontSize}"/>
                 <Button Text ="Lade Daten"  Command="{Binding LoadDataCommand}" Margin="10" BackgroundColor ="Green" 
-                    HorizontalOptions="Start" Grid.Column="1" FontSize="{Binding FontSize}"/>
+                    HorizontalOptions="Center" Grid.Column="1" FontSize="{Binding FontSize}"/>
+                <ImageButton 
+                    Margin="10"
+                    Grid.Row="0" 
+                    Grid.Column="2"
+                    HorizontalOptions="End"
+                    HeightRequest="20"
+                    WidthRequest="20"
+                    Source="settings.png"
+                    Command="{Binding GoToSettingsCommand}"
+                />
             </Grid>
-        </HorizontalStackLayout>
 
 
         <!--<HorizontalStackLayout Grid.Row="1" Grid.ColumnSpan="3" HorizontalOptions="Center">
@@ -71,24 +67,28 @@
 
         <!-- Datenanzeige -->
 
-        <ScrollView Grid.Row="2" Margin="0,20,0,20" Grid.ColumnSpan="3">
+        <ScrollView Grid.Row="1" Margin="0,20,0,20" Grid.ColumnSpan="3">
             <CollectionView ItemsSource="{Binding Data}" Margin="0,0,0,10">
                 <!-- Spaltenüberschriften -->
                 <CollectionView.Header>
-                    <Grid ColumnDefinitions="1*,1*" Margin="5">
+                    <Grid ColumnDefinitions="1*,1*,1.5*" Margin="5">
                         <Label Text="Datum:" FontAttributes="Bold"  Grid.Column="0" HorizontalOptions="Center" 
                                TextDecorations="Underline" FontSize="{Binding Source={RelativeSource AncestorType={x:Type viewModels:ParkrunViewModel}},Path=FontSize}"/>
                         <Label Text="Zeit:" FontAttributes="Bold"  Grid.Column="1" HorizontalOptions="Center" 
+                               TextDecorations="Underline" FontSize="{Binding Source={RelativeSource AncestorType={x:Type viewModels:ParkrunViewModel}},Path=FontSize}"/>
+                        <Label Text="Track:" FontAttributes="Bold"  Grid.Column="2" HorizontalOptions="Center" 
                                TextDecorations="Underline" FontSize="{Binding Source={RelativeSource AncestorType={x:Type viewModels:ParkrunViewModel}},Path=FontSize}"/>
                     </Grid>
                 </CollectionView.Header>
 
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
-                        <Grid ColumnDefinitions="1*,1*" Margin="5">
+                        <Grid ColumnDefinitions="1*,1*,1.5*" Margin="5">
                             <Label Text="{Binding Date, StringFormat='{0:dd.MM.yyyy}'}" Grid.Column="0" Margin="10" HorizontalOptions="Center" 
                                    FontSize="{Binding Source={RelativeSource AncestorType={x:Type viewModels:ParkrunViewModel}},Path=FontSize}"/>
                             <Label Text="{Binding Time}" Grid.Column="1" Margin="10" HorizontalOptions="Center" 
+                                   FontSize="{Binding Source={RelativeSource AncestorType={x:Type viewModels:ParkrunViewModel}},Path=FontSize}"/>
+                            <Label Text="{Binding TrackName}" Grid.Column="2" Margin="10" HorizontalOptions="Center" 
                                    FontSize="{Binding Source={RelativeSource AncestorType={x:Type viewModels:ParkrunViewModel}},Path=FontSize}"/>
                         </Grid>
                     </DataTemplate>
@@ -97,14 +97,33 @@
         </ScrollView>
 
         <!--IsEnabled="{Binding IsScrappingButtonDisabled}"-->
-        <VerticalStackLayout Grid.Row="3" Grid.ColumnSpan="3">
-            <Button Text="Aktualisiere die Datenbank"  TextColor="DarkRed" BackgroundColor="RosyBrown" WidthRequest="400"
-                Command="{Binding FetchDataFromWebsite}"  Grid.ColumnSpan="3" Margin="10"  FontSize="{Binding FontSize}"
-                HorizontalOptions="Center" />
-            <Button Text="Lösche die Datenbank"  TextColor="RosyBrown" BackgroundColor="DarkRed" WidthRequest="400"
-                Command="{Binding DeleteTableCommand}"  Grid.ColumnSpan="3" Margin="10" FontSize="{Binding FontSize}"
-                HorizontalOptions="Center" />
-            <Label Text="{Binding ParkrunInfo}" BackgroundColor="MistyRose" TextColor="DarkRed" HorizontalOptions="Center" FontSize="{Binding FontSize}"/>
+        <VerticalStackLayout Grid.Row="2" Grid.ColumnSpan="3" Margin="10">
+            
+            <ProgressBar 
+                Progress="{Binding Progress}" 
+                IsVisible="{Binding IsScrappingProgressEnabled}"/>
+            
+            <ActivityIndicator IsRunning="{Binding IsScrappingProgressEnabled}" 
+                   IsVisible="{Binding IsScrappingProgressEnabled}" 
+                   Color="DarkRed"
+                   Margin="10"/>
+
+            <Label Text="{Binding ParkrunInfo}" BackgroundColor="AntiqueWhite"  TextColor="Red" HorizontalOptions="Center" 
+                   FontSize="{Binding FontSize}" IsVisible="{Binding IsScrappingProgressEnabled}" Margin="10" Padding="10"/>
+
+            <HorizontalStackLayout Grid.ColumnSpan="3" HorizontalOptions="Center">
+                
+                <Button Text="Aktualisiere Datenbank"  TextColor="DarkRed" BackgroundColor="RosyBrown" 
+                    Command="{Binding FetchDataFromWebsite}"   Margin="10"  FontSize="{Binding FontSize}"
+                    HorizontalOptions="Center" />
+
+
+                <Button Text="Lösche Datenbank"  TextColor="RosyBrown" BackgroundColor="DarkRed"
+                    Command="{Binding DeleteTableCommand}"  Margin="10" FontSize="{Binding FontSize}"
+                    HorizontalOptions="Center" />
+
+            </HorizontalStackLayout>
+            
         </VerticalStackLayout>
     </Grid>
 </ContentPage>

@@ -28,8 +28,17 @@ public partial class ParkrunPage : ContentPage
             var data = DatabaseService.GetDataSync();
             if (data != null)
             {
-                // Filtere die Daten basierend auf dem Namen des Parkrunners, welche nach dem Datum sortiert wurden
-                var filteredData = data.Where(x => x.Name.ToLower() == parkrunViewModel.ParkrunnerName).OrderBy(x => x.Date);
+                // Hol die gespeicherten Track-Namen aus den Einstellungen
+                var selectedTracks = Preferences.Get("SelectedTracks", string.Empty)
+                                                .Split(',')
+                                                .Select(t => t.Trim())
+                                                .ToList();
+
+                // Filtere die Daten nach Parkrunner-Name UND nach den ausgewählten Tracks
+                var filteredData = data.Where(x => x.Name.ToLower() == parkrunViewModel.ParkrunnerName
+                                                 && selectedTracks.Contains(x.TrackName))
+                                       .OrderBy(x => x.Date);
+
 
                 parkrunViewModel.Data = new System.Collections.ObjectModel.ObservableCollection<ParkrunData>(filteredData);
             }

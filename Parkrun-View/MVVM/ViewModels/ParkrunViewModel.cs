@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -37,21 +38,25 @@ namespace Parkrun_View.MVVM.ViewModels
         public int SelectedMinute { get; set; }
         public int SelectedSecond { get; set; }
 
+        string parkrunnerName = string.Empty;
+
         public string ParkrunnerName
         {
-            get => _parkrunnerName;
+            get => parkrunnerName;
             set
             {
-                _parkrunnerName = value;
+                parkrunnerName = value;
 
                 // Automatisches Speichern in Preferences
-                Preferences.Set("ParkrunnerName", _parkrunnerName.ToLower().Trim());
+                Preferences.Set("ParkrunnerName", parkrunnerName.ToLower().Trim());
             }
         }
 
         public string ParkrunInfo { get; set; } = string.Empty; // Info für den User, von welcher Seite von der Webseite geladen werden.
         public bool IsScrapping { get; set; } = false;          // Wenn true, dann wird von der Webseite Daten extrahiert.
-        public bool IsScrappingButtonDisabled => !IsScrapping;
+        public bool IsScrappingProgressEnabled { get; set; } = false;
+
+        public double Progress { get; set; }
 
 
         public TimeSpan SelectedTime => new TimeSpan(SelectedHour, SelectedMinute, SelectedSecond);
@@ -71,7 +76,6 @@ namespace Parkrun_View.MVVM.ViewModels
 
         public ICommand GoToSettingsCommand { get; } = NavigationHelper.GoToSettingsCommand;
 
-        string _parkrunnerName = string.Empty;
 
 
         private bool isDataLoaded = false;
@@ -161,6 +165,7 @@ namespace Parkrun_View.MVVM.ViewModels
             {
                 ParkrunnerName = Preferences.Get("ParkrunnerName", string.Empty);
             }
+
         }
 
         public async Task ScrapeParkrunDataAsync(string searchName)
@@ -170,6 +175,7 @@ namespace Parkrun_View.MVVM.ViewModels
 
             IsScrapping = true; // Setze den Status auf "Daten werden von der Webseite extrahiert"
             bool isScrapSuccess = false; // Variable, um den Erfolg des Scrappens zu verfolgen
+            IsScrappingProgressEnabled = true;
 
             List<string> parkrunLocations = GetParkrunLocations();
 
@@ -214,7 +220,7 @@ namespace Parkrun_View.MVVM.ViewModels
                     .Max(x => x.ParkrunNr + 1) : 1; //Holt sich die Nr. vom letzten Run von der Datenbank und addiere 1 dazu, so dass man mit der nächsten Seite, welche man scrappen will, fortsetzen kann. Falls die Datenbank keine Einträge hat, setze 1
 
                 int totalRuns = CalculateTotalRuns(location);
-                totalRuns = 2; //test
+                totalRuns = 18; //test
                 for (int run = nextParkrunNr; run <= totalRuns; run++)
                 {
                     string url = $"https://www.parkrun.com.de/{location}/results/{run}/";
@@ -278,7 +284,9 @@ namespace Parkrun_View.MVVM.ViewModels
                                 //    Data.Add(parkrunData);
 
                                 isScrapSuccess = true;
-                                
+
+                                Progress = (double)(run - nextParkrunNr + 1) / (totalRuns - nextParkrunNr + 1); // Berechnet den Fortschritt in Prozent
+
                                 await DatabaseService.SaveDataAsync(parkrunData);
                             }
                         }
@@ -293,24 +301,39 @@ namespace Parkrun_View.MVVM.ViewModels
                         break;
                     }
                 }
+                IsScrappingProgressEnabled = false; // Deaktiviere die Anzeige für den Status der Fortschrittsanzeige 
 
-                if (nextParkrunNr >= totalRuns)
+                if (nextParkrunNr > totalRuns)
                 {
-                    ParkrunInfo = "Es sind keine neuen Daten vorhanden.";
+                    //ParkrunInfo = "Es sind keine neuen Daten vorhanden.";
+                    if (Application.Current?.MainPage != null)
+                        await Application.Current.MainPage.DisplayAlert("Hinweis", "Es sind keine neuen Daten vorhanden.", "OK");
+
                 }
                 else if (isScrapSuccess) // Wenn das Scrappen erfolgreich war
                 {
                     int currentParkrunNr = nextParkrunNr - 1;
-                    ParkrunInfo = "Die Datenbank wurde erfolgreich aktualisiert. Es sind " + (totalRuns - currentParkrunNr) + " neue Daten vorhanden.";
+                    //ParkrunInfo = "Die Datenbank wurde erfolgreich aktualisiert. Es sind " + (totalRuns - currentParkrunNr) + " neue Daten vorhanden.";
+                    if (Application.Current?.MainPage != null)
+                    {
+                        int newRecords = totalRuns - currentParkrunNr;
+                        string message = newRecords == 1
+                            ? $"Die Datenbank wurde erfolgreich aktualisiert. Es ist {newRecords} neuer Datensatz vorhanden."
+                            : $"Die Datenbank wurde erfolgreich aktualisiert. Es sind {newRecords} neue Datensätze vorhanden.";
+
+                        await Application.Current.MainPage.DisplayAlert("Hinweis", message, "OK");
+                    }
+
                 }
                 else // Wenn das Scrappen nicht erfolgreich war
                 {
-                    ParkrunInfo = "Es konnte keine Verbindung zur Webseite aufgebaut werden.";
+                    //ParkrunInfo = "Es konnte keine Verbindung zur Webseite aufgebaut werden.";
+                    if (Application.Current?.MainPage != null)
+                        await Application.Current.MainPage.DisplayAlert("Fehler", "Es konnte keine Verbindung zur Webseite aufgebaut werden.", "OK");
                 }
             } // Ende der foreach-Schleife für die Parkrun-Standorte
 
             IsScrapping = false; // Setze den Status zurück, wenn die Datenextraktion abgeschlossen ist
-
 
 
             // Berechnet die Gesamtanzahl der Parkruns basierend auf dem Datum des ersten Parkruns in Deutschland
@@ -450,7 +473,8 @@ namespace Parkrun_View.MVVM.ViewModels
                                 waitTime = new Random().Next(60, 80); // Zufällige Wartezeit 
                             }
                             //Console.WriteLine($"403 Forbidden – Warte {waitTime} Sekunden und versuche mit neuem User-Agent erneut...");
-                            ParkrunInfo = "Statuscode: " + response.StatusCode + " – Warten Sie bitte " + waitTime + " Sekunden. Es wird danach erneut versucht.";
+                            //ParkrunInfo = "Statuscode: " + response.StatusCode + " – Warten Sie bitte " + waitTime + " Sekunden. Es wird danach erneut versucht.";
+                            ParkrunInfo = $"Die Verbindung konnte nicht hergestellt werden. In {waitTime} Sekunden wird ein neuer Versuch gestartet.";
                             await Task.Delay(TimeSpan.FromSeconds(waitTime));
                             tryCount++;
                             continue;
