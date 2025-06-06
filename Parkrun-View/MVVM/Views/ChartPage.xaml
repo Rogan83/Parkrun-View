@@ -4,7 +4,11 @@
              x:Class="Parkrun_View.MVVM.Views.ChartPage"
              xmlns:microcharts="clr-namespace:Microcharts.Maui;assembly=Microcharts.Maui"
              Title="">
-    
+    <ContentPage.ToolbarItems>
+        <ToolbarItem IconImageSource="parkrunlogo.png" />
+    </ContentPage.ToolbarItems>
+
+
     <Grid RowDefinitions="auto,auto,auto">
         <VerticalStackLayout  Grid.Row="0" >
             <Grid ColumnDefinitions="3*,1*" HorizontalOptions="Center">

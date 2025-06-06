@@ -39,7 +39,6 @@ public partial class ParkrunPage : ContentPage
                                                  && selectedTracks.Contains(x.TrackName))
                                        .OrderBy(x => x.Date);
 
-
                 parkrunViewModel.Data = new System.Collections.ObjectModel.ObservableCollection<ParkrunData>(filteredData);
             }
         }

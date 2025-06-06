@@ -3,6 +3,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="Parkrun_View.MVVM.Views.RunningAnalysisPage"
              Title="">
+    <ContentPage.ToolbarItems>
+        <ToolbarItem IconImageSource="parkrunlogo.png" />
+    </ContentPage.ToolbarItems>
     <!--RunningAnalysisPage-->
     <VerticalStackLayout>
         <Grid ColumnDefinitions="1000*,*" HorizontalOptions="Fill">

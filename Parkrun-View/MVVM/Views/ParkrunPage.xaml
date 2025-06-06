@@ -5,6 +5,9 @@
              xmlns:microcharts="clr-namespace:Microcharts.Maui;assembly=Microcharts.Maui"
              x:Class="Parkrun_View.MVVM.Views.ParkrunPage"
              Title="">
+    <ContentPage.ToolbarItems>
+        <ToolbarItem IconImageSource="parkrunlogo.png" />
+    </ContentPage.ToolbarItems>
     <Grid RowDefinitions="auto,*,auto" Padding="0" ColumnDefinitions="1*,1*,1*" HorizontalOptions="Center" >
             <Grid ColumnDefinitions="1*,1*,auto" Margin="5" HorizontalOptions="Fill" Grid.ColumnSpan="3">
                 <!-- Oberer Bereich für Datum und Zeitwahl -->

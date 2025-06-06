@@ -4,7 +4,11 @@
              x:Class="Parkrun_View.MVVM.Views.SettingsPage"
              xmlns:viewModels="clr-namespace:Parkrun_View.MVVM.ViewModels"
              Title="Einstellungen">
-
+    
+    <ContentPage.ToolbarItems>
+        <ToolbarItem IconImageSource="parkrunlogo.png" />
+    </ContentPage.ToolbarItems>
+    
     <VerticalStackLayout>
         <Label Text="Wähle hier deine Strecken aus" HorizontalOptions="Center" Margin="10" FontSize="Large"/>
         <ScrollView>
