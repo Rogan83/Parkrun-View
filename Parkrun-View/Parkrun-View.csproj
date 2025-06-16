@@ -45,7 +45,9 @@
 		<!-- App Icon -->
 
 		<!-- Splash Screen -->
-		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+		<!--<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />-->
+		<MauiSplashScreen Include="Resources\Splash\parkrun_splash.png" Color="Orange" BaseSize="1024,1024" />
+
 
 		<!-- Images -->
 		<MauiImage Include="Resources\Images\*" />
@@ -90,6 +92,10 @@
 	  <MauiXaml Update="MVVM\Views\SettingsPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="Resources\Splash\parkrun_splash.png" Color="#512BD4" BaseSize="128,128" />
 	</ItemGroup>
 
 </Project>

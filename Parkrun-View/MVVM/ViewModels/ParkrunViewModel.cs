@@ -168,6 +168,8 @@ namespace Parkrun_View.MVVM.ViewModels
 
         }
 
+        int datacount = 0; // Variable, um die Anzahl der Datensätze zu zählen, die von der Webseite extrahiert wurden. Wird für den Fortschritt benötigt.
+        bool isURLValid = true; // Variable, um zu überprüfen, ob die URL gültig ist. Wird für den Fortschritt benötigt.
         public async Task ScrapeParkrunDataAsync(string searchName)
         {
             //suche aus der Datenbank den höchsten Parkrun Nr. und setze den Startwert für die Schleife
@@ -220,15 +222,21 @@ namespace Parkrun_View.MVVM.ViewModels
                     .Max(x => x.ParkrunNr + 1) : 1; //Holt sich die Nr. vom letzten Run von der Datenbank und addiere 1 dazu, so dass man mit der nächsten Seite, welche man scrappen will, fortsetzen kann. Falls die Datenbank keine Einträge hat, setze 1
 
                 int totalRuns = CalculateTotalRuns(location);
-                totalRuns = 18; //test
+                //totalRuns = 20; //test
                 for (int run = nextParkrunNr; run <= totalRuns; run++)
                 {
                     string url = $"https://www.parkrun.com.de/{location}/results/{run}/";
                     var htmlContent = await ScrapeSingleParkrunSiteAsync(url);
+
+                    //todo: Hier sollte eine Überprüfung erfolgen, ob die URL gültig ist. Falls nicht, dann soll der Scrapper abbrechen und die Schleife verlassen
+
+
+                    /////
+
                     htmlContent = HttpUtility.HtmlDecode(htmlContent); // Wandelt HTML-Entity in lesbaren Text um
                     if (!string.IsNullOrEmpty(htmlContent))
                     {
-                        ParkrunInfo = "Extrahiere Seite " + run.ToString();  //Dient als Info für den User, von welcher Seite von der Webseite geladen werden.
+                        ParkrunInfo = $"Extrahiere Seite {run.ToString()} vom parkrun {location.ToUpper()}";  //Dient als Info für den User, von welcher Seite von der Webseite geladen werden.
 
                         // Parse den HTML-Inhalt mit HtmlAgilityPack
                         var doc = new HtmlDocument();
@@ -284,12 +292,15 @@ namespace Parkrun_View.MVVM.ViewModels
                                 //    Data.Add(parkrunData);
 
                                 isScrapSuccess = true;
-
-                                Progress = (double)(run - nextParkrunNr + 1) / (totalRuns - nextParkrunNr + 1); // Berechnet den Fortschritt in Prozent
+                                
 
                                 await DatabaseService.SaveDataAsync(parkrunData);
                             }
                         }
+
+                        // Aktualisiere die Fortschrittsanzeige
+                        var bar = (double)(run - nextParkrunNr + 1) / (totalRuns - nextParkrunNr + 1); // Berechnet den Fortschritt in Prozent
+                        Progress = bar;
 
                         int waitTime = new Random().Next(14, 20); // Zufällige Wartezeit 
 
@@ -301,37 +312,39 @@ namespace Parkrun_View.MVVM.ViewModels
                         break;
                     }
                 }
-                IsScrappingProgressEnabled = false; // Deaktiviere die Anzeige für den Status der Fortschrittsanzeige 
+                datacount += (totalRuns - nextParkrunNr - 1);
 
-                if (nextParkrunNr > totalRuns)
-                {
-                    //ParkrunInfo = "Es sind keine neuen Daten vorhanden.";
-                    if (Application.Current?.MainPage != null)
-                        await Application.Current.MainPage.DisplayAlert("Hinweis", "Es sind keine neuen Daten vorhanden.", "OK");
 
-                }
-                else if (isScrapSuccess) // Wenn das Scrappen erfolgreich war
-                {
-                    int currentParkrunNr = nextParkrunNr - 1;
-                    //ParkrunInfo = "Die Datenbank wurde erfolgreich aktualisiert. Es sind " + (totalRuns - currentParkrunNr) + " neue Daten vorhanden.";
-                    if (Application.Current?.MainPage != null)
-                    {
-                        int newRecords = totalRuns - currentParkrunNr;
-                        string message = newRecords == 1
-                            ? $"Die Datenbank wurde erfolgreich aktualisiert. Es ist {newRecords} neuer Datensatz vorhanden."
-                            : $"Die Datenbank wurde erfolgreich aktualisiert. Es sind {newRecords} neue Datensätze vorhanden.";
-
-                        await Application.Current.MainPage.DisplayAlert("Hinweis", message, "OK");
-                    }
-
-                }
-                else // Wenn das Scrappen nicht erfolgreich war
-                {
-                    //ParkrunInfo = "Es konnte keine Verbindung zur Webseite aufgebaut werden.";
-                    if (Application.Current?.MainPage != null)
-                        await Application.Current.MainPage.DisplayAlert("Fehler", "Es konnte keine Verbindung zur Webseite aufgebaut werden.", "OK");
-                }
             } // Ende der foreach-Schleife für die Parkrun-Standorte
+            IsScrappingProgressEnabled = false; // Deaktiviere die Anzeige für den Status der Fortschrittsanzeige 
+
+            if (!isURLValid) // Wenn das Scrappen nicht erfolgreich war
+            {
+                //ParkrunInfo = "Es konnte keine Verbindung zur Webseite aufgebaut werden.";
+                if (Application.Current?.MainPage != null)
+                    await Application.Current.MainPage.DisplayAlert("Fehler", "Es konnte keine Verbindung zur Webseite aufgebaut werden.", "OK");
+            }
+            else if (!isScrapSuccess)
+            {
+                //ParkrunInfo = "Es sind keine neuen Daten vorhanden.";
+                if (Application.Current?.MainPage != null)
+                    await Application.Current.MainPage.DisplayAlert("Hinweis", "Es sind keine neuen Daten vorhanden.", "OK");
+
+            }
+            else if (isScrapSuccess) // Wenn das Scrappen erfolgreich war
+            {
+                //ParkrunInfo = "Die Datenbank wurde erfolgreich aktualisiert. Es sind " + (totalRuns - currentParkrunNr) + " neue Daten vorhanden.";
+                if (Application.Current?.MainPage != null)
+                {
+                    string message = datacount == 1
+                        ? $"Die Datenbank wurde erfolgreich aktualisiert. Es ist {datacount} neuer Datensatz vorhanden."
+                        : $"Die Datenbank wurde erfolgreich aktualisiert. Es sind {datacount} neue Datensätze vorhanden.";
+
+                    await Application.Current.MainPage.DisplayAlert("Hinweis", message, "OK");
+                }
+            }
+
+
 
             IsScrapping = false; // Setze den Status zurück, wenn die Datenextraktion abgeschlossen ist
 
@@ -486,6 +499,7 @@ namespace Parkrun_View.MVVM.ViewModels
                     catch (Exception ex)
                     {
                         Console.WriteLine($"Fehler beim Abrufen der Webseite: {ex.Message}");
+                        isURLValid = false; // Variable, um den Erfolg des Scrappens zu verfolgen. Wird für den Fortschritt benötigt.
                         break;
                         //tryCount++;
                     }
