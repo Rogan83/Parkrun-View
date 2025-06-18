@@ -1,4 +1,5 @@
 ﻿using HtmlAgilityPack;
+using Microsoft.Maui.Devices.Sensors;
 using Parkrun_View.MVVM.Helpers;
 using Parkrun_View.MVVM.Models;
 using Parkrun_View.Services;
@@ -214,6 +215,7 @@ namespace Parkrun_View.MVVM.ViewModels
             else
                 ParkrunInfo = "Keine Parkrun-Standorte ausgewählt. Bitte gehe zu den Einstellungen und wähle mindestens einen Parkrun-Standort aus.";
 
+           
 
             foreach (var location in parkrunLocations)
             {
@@ -221,8 +223,10 @@ namespace Parkrun_View.MVVM.ViewModels
                     .Where(x => x.TrackName == location)
                     .Max(x => x.ParkrunNr + 1) : 1; //Holt sich die Nr. vom letzten Run von der Datenbank und addiere 1 dazu, so dass man mit der nächsten Seite, welche man scrappen will, fortsetzen kann. Falls die Datenbank keine Einträge hat, setze 1
 
+                int currentParkrunNr = nextParkrunNr - 1;  //Die aktuell höchste Parkrun Nr in der Datenbank von einem bestimmten Ort
+
                 int totalRuns = CalculateTotalRuns(location);
-                //totalRuns = 20; //test
+                totalRuns = 8; //test
                 for (int run = nextParkrunNr; run <= totalRuns; run++)
                 {
                     string url = $"https://www.parkrun.com.de/{location}/results/{run}/";
@@ -312,7 +316,7 @@ namespace Parkrun_View.MVVM.ViewModels
                         break;
                     }
                 }
-                datacount += (totalRuns - nextParkrunNr - 1);
+                datacount += (totalRuns - currentParkrunNr);
 
 
             } // Ende der foreach-Schleife für die Parkrun-Standorte

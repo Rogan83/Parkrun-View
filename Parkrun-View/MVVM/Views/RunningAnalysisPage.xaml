@@ -52,7 +52,7 @@
                 <Label 
                     Text= "{Binding KmH, StringFormat='{0:F2} Km/H'}"
                     HorizontalOptions="Center"
-                    TextColor="SaddleBrown"
+                    TextColor="Green"
                     FontSize="{Binding FontSize}"
                      />
             </VerticalStackLayout>
@@ -70,7 +70,7 @@
                 <Label 
                     Text= "{Binding NumberOfRuns}"
                     HorizontalOptions="Center"
-                    TextColor="SaddleBrown"
+                    TextColor="Green"
                     FontSize="{Binding FontSize}"
                      />
             </VerticalStackLayout>
@@ -87,7 +87,7 @@
                 <Label 
                     Text= "{Binding MaxKmH, StringFormat='{0:F2}'}"
                     HorizontalOptions="Center"
-                    TextColor="SaddleBrown"
+                    TextColor="Green"
                     FontSize="{Binding FontSize}"
                      />
             </VerticalStackLayout>
@@ -103,7 +103,7 @@
                 <Label 
                     Text= "{Binding MinKmH, StringFormat='{0:F2}'}"
                     HorizontalOptions="Center"
-                    TextColor="SaddleBrown"
+                    TextColor="Green"
                     FontSize="{Binding FontSize}"
                      />
             </VerticalStackLayout>
@@ -121,19 +121,19 @@
                     <Label 
                          Text= "{Binding BestTimeInHours, StringFormat='{0:00}:'}"
                          HorizontalOptions="Center"
-                         TextColor="SaddleBrown"
+                         TextColor="Green"
                         FontSize="{Binding FontSize}"
                     />
                     <Label 
                          Text= "{Binding BestTimeInMinutes, StringFormat='{0:00}:'}"
                          HorizontalOptions="Center"
-                         TextColor="SaddleBrown"
+                         TextColor="Green"
                         FontSize="{Binding FontSize}"
                      />
                     <Label 
                          Text= "{Binding BestTimeInSeconds, StringFormat='{0:00}'}"
                          HorizontalOptions="Center"
-                         TextColor="SaddleBrown"
+                         TextColor="Green"
                         FontSize="{Binding FontSize}"
                     />
                 </HorizontalStackLayout>
@@ -152,19 +152,19 @@
                     <Label 
                          Text= "{Binding WorstTimeInHours, StringFormat='{0:00}:'}"
                          HorizontalOptions="Center"
-                         TextColor="SaddleBrown"
+                         TextColor="Green"
                         FontSize="{Binding FontSize}"
                  />
                     <Label 
                          Text= "{Binding WorstTimeInMinutes, StringFormat='{0:00}:'}"
                          HorizontalOptions="Center"
-                         TextColor="SaddleBrown"
+                         TextColor="Green"
                         FontSize="{Binding FontSize}"
                  />
                     <Label 
                          Text= "{Binding WorstTimeInSeconds, StringFormat='{0:00}'}"
                          HorizontalOptions="Center"
-                         TextColor="SaddleBrown"
+                         TextColor="Green"
                         FontSize="{Binding FontSize}"
                  />
                 </HorizontalStackLayout>
