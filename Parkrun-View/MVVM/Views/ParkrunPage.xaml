@@ -115,15 +115,20 @@
                    FontSize="{Binding FontSize}" IsVisible="{Binding IsScrappingProgressEnabled}" Margin="10" Padding="10"/>
 
             <HorizontalStackLayout Grid.ColumnSpan="3" HorizontalOptions="Center">
-                
-                <Button Text="Aktualisiere Datenbank"  TextColor="DarkRed" BackgroundColor="RosyBrown" 
-                    Command="{Binding FetchDataFromWebsite}"   Margin="10"  FontSize="{Binding FontSize}"
+
+                <Button Text="{Binding UpdateDatabaseButtonText}"  TextColor="DarkRed" BackgroundColor="RosyBrown" 
+                    Command="{Binding ToogleUpdateButtonCommand}"   Margin="10"  FontSize="{Binding FontSize}"
                     HorizontalOptions="Center" />
 
 
                 <Button Text="Lösche Datenbank"  TextColor="RosyBrown" BackgroundColor="DarkRed"
                     Command="{Binding DeleteTableCommand}"  Margin="10" FontSize="{Binding FontSize}"
                     HorizontalOptions="Center" />
+
+                <!--<Button Text="Abbrechen"  TextColor="DarkRed" BackgroundColor="RosyBrown"
+                    Command="{Binding CancelUpdateDataCommand}"  Margin="10" FontSize="{Binding FontSize}"
+                    HorizontalOptions="Center" />-->   
+
 
             </HorizontalStackLayout>
             

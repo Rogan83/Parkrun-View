@@ -53,9 +53,16 @@ namespace Parkrun_View.MVVM.ViewModels
             }
         }
 
+        public string UpdateDatabaseButtonText { get; set; }
+
+        string updateDatabaseText = "Aktualisiere Datenbank"; // Text für den Button, der die Datenbank aktualisiert. Wird beim Toggeln "UpdateDatabaseText" zugewiesen.
+        string cancelUpdateText = "Abbrechen"; // Text für den Button, der das Aktualisieren abbricht. Wird beim Toggeln "UpdateDatabaseText" zugewiesen.
+
         public string ParkrunInfo { get; set; } = string.Empty; // Info für den User, von welcher Seite von der Webseite geladen werden.
         public bool IsScrapping { get; set; } = false;          // Wenn true, dann wird von der Webseite Daten extrahiert.
         public bool IsScrappingProgressEnabled { get; set; } = false;
+
+        bool toogleUpdateButton = true; // Wenn true, dann wird beim Button der Text "Aktualisiere Datenbank" angezeigt. Anderfalls "Abbrechen".
 
         public double Progress { get; set; }
 
@@ -64,10 +71,11 @@ namespace Parkrun_View.MVVM.ViewModels
 
         public ICommand AddDataCommand { get; }
         public ICommand RemoveDataCommand { get; }
-        public ICommand FetchDataFromWebsite { get; }
+        public ICommand ToogleUpdateButtonCommand { get; }
         public ICommand LoadDataCommand { get; }
 
         public ICommand DeleteTableCommand { get; }
+        public ICommand CancelUpdateDataCommand { get; }
 
 
         public Command OpenChartPageCommand => new Command(async () =>
@@ -145,11 +153,30 @@ namespace Parkrun_View.MVVM.ViewModels
                 }
             });
 
-            FetchDataFromWebsite = new Command(async () =>
+            ToogleUpdateButtonCommand = new Command(async () =>
             {
-                await ScrapeParkrunDataAsync(ParkrunnerName);
-                await LoadDataAsync();
+                if (toogleUpdateButton)
+                {
+                    toogleUpdateButton = false;
+                    UpdateDatabaseButtonText = cancelUpdateText;  // Wenn der Button gedrückt wird, dann wird der Text auf "Abbrechen" geändert.
+
+                    await ScrapeParkrunDataAsync(ParkrunnerName);
+                    await LoadDataAsync();
+                }
+                else
+                {
+                    toogleUpdateButton = true; // Setze den Status des Buttons auf "Aktualisieren" zurück
+                    UpdateDatabaseButtonText = updateDatabaseText;  // Wenn der Button gedrückt wird, dann wird der Text auf "Aktualisiere Datenbank" geändert.
+
+                    // Abbrechen des Scrappens, falls der User es wünscht.
+                    if (cts != null && !cts.IsCancellationRequested)
+                    {
+                        IsScrappingProgressEnabled = false; // Deaktiviere die Anzeige für den Status der Fortschrittsanzeige 
+                        cts.Cancel();
+                    }
+                }
             });
+
 
             LoadDataCommand = new Command(async () =>
             {
@@ -161,18 +188,36 @@ namespace Parkrun_View.MVVM.ViewModels
                 DeleteTable();
             });
 
+            CancelUpdateDataCommand = new Command(() =>
+            {
+                if (cts != null && !cts.IsCancellationRequested)
+                {
+                    IsScrappingProgressEnabled = false; // Deaktiviere die Anzeige für den Status der Fortschrittsanzeige 
+                    cts.Cancel();
+                }
+            });
+
 
             if (Preferences.Get("ParkrunnerName", string.Empty) != string.Empty)
             {
                 ParkrunnerName = Preferences.Get("ParkrunnerName", string.Empty);
             }
 
+            if (toogleUpdateButton)
+                UpdateDatabaseButtonText = updateDatabaseText; // Wenn der Button gedrückt wird, dann wird der Text auf "Aktualisiere Datenbank" geändert.
+            else
+                UpdateDatabaseButtonText = cancelUpdateText; // Wenn der Button gedrückt wird, dann wird der Text auf "Aktualisiere Datenbank" geändert.
+
         }
 
         int datacount = 0; // Variable, um die Anzahl der Datensätze zu zählen, die von der Webseite extrahiert wurden. Wird für den Fortschritt benötigt.
         bool isURLValid = true; // Variable, um zu überprüfen, ob die URL gültig ist. Wird für den Fortschritt benötigt.
+        private CancellationTokenSource cts; // Variable, um den Task des Scrappens abzubrechen, falls der User es wünscht.
+
         public async Task ScrapeParkrunDataAsync(string searchName)
         {
+            cts = new CancellationTokenSource();        // Wird verwendet, um den Task des Scrappens abzubrechen, falls der User es wünscht.
+
             //suche aus der Datenbank den höchsten Parkrun Nr. und setze den Startwert für die Schleife
             var data = await DatabaseService.GetDataAsync();
 
@@ -185,14 +230,6 @@ namespace Parkrun_View.MVVM.ViewModels
             // Wandelt den String, wo alle Namen von den Parkrun-Standorten gespeichert sind, in eine Liste um.
             List<string> GetParkrunLocations()
             {
-                // Mapping zwischen gespeicherter Schreibweise und gewünschtem Format. 
-                // Dient dazu, falls die Schreibweise der gespeicherten Parkrun-Standorte in den Preferences nicht mit der Schreibweise der URL übereinstimmt.
-                //var nameMapping = new Dictionary<string, string>
-                //{
-                //    { "Prießnitzgrund", "priessnitzgrund" },
-                //    // Weitere Namen können hier hinzugefügt werden
-                //};
-
                 // Gespeicherte Namen aus Preferences laden
                 var savedTracks = Preferences.Get("SelectedTracks", "").Split(',');
 
@@ -211,7 +248,7 @@ namespace Parkrun_View.MVVM.ViewModels
             }
 
             if (parkrunLocations.Count > 0)
-                ParkrunInfo = "Starte mit dem Exrahieren der Daten von der Webseite...";
+                ParkrunInfo = "Starte mit dem Extrahieren der Daten von der Webseite...";
             else
                 ParkrunInfo = "Keine Parkrun-Standorte ausgewählt. Bitte gehe zu den Einstellungen und wähle mindestens einen Parkrun-Standort aus.";
 
@@ -226,16 +263,17 @@ namespace Parkrun_View.MVVM.ViewModels
                 int currentParkrunNr = nextParkrunNr - 1;  //Die aktuell höchste Parkrun Nr in der Datenbank von einem bestimmten Ort
 
                 int totalRuns = CalculateTotalRuns(location);
-                totalRuns = 8; //test
+                //totalRuns = 11; //test
                 for (int run = nextParkrunNr; run <= totalRuns; run++)
                 {
+                    // Prüfe, ob der Task abgebrochen wurde
+                    if (cts != null && cts.IsCancellationRequested)
+                    {
+                        return; // Beende die Schleife, wenn der Task abgebrochen wurde
+                    }
+
                     string url = $"https://www.parkrun.com.de/{location}/results/{run}/";
                     var htmlContent = await ScrapeSingleParkrunSiteAsync(url);
-
-                    //todo: Hier sollte eine Überprüfung erfolgen, ob die URL gültig ist. Falls nicht, dann soll der Scrapper abbrechen und die Schleife verlassen
-
-
-                    /////
 
                     htmlContent = HttpUtility.HtmlDecode(htmlContent); // Wandelt HTML-Entity in lesbaren Text um
                     if (!string.IsNullOrEmpty(htmlContent))
@@ -260,7 +298,7 @@ namespace Parkrun_View.MVVM.ViewModels
                             {
                                 var parkrunNr = run;
                                 var name = trNode.GetAttributeValue("data-name", "Kein Name vorhanden"); // Wandelt HTML-Entity um
-                                                                                                            //if (name.ToLower() != searchName.ToLower()) { continue; } // Hier wird der Name des Läufers gefiltert
+                                                                                                         //if (name.ToLower() != searchName.ToLower()) { continue; } // Hier wird der Name des Läufers gefiltert
                                 var ageGroup = trNode.GetAttributeValue("data-agegroup", "Keine Altersgruppe vorhanden");
 
                                 string genderText = trNode.InnerText.Trim();
@@ -296,7 +334,7 @@ namespace Parkrun_View.MVVM.ViewModels
                                 //    Data.Add(parkrunData);
 
                                 isScrapSuccess = true;
-                                
+
 
                                 await DatabaseService.SaveDataAsync(parkrunData);
                             }
@@ -309,7 +347,7 @@ namespace Parkrun_View.MVVM.ViewModels
                         int waitTime = new Random().Next(14, 20); // Zufällige Wartezeit 
 
                         if (run < totalRuns)
-                            await Task.Delay(TimeSpan.FromSeconds(waitTime));
+                            await WaitBeforeNextScrape(waitTime, ParkrunInfo + ". Die Daten von der nächste Seite werden extrahiert in ", "Aktualisierung abgebrochen.");
                     }
                     else
                     {
@@ -424,6 +462,25 @@ namespace Parkrun_View.MVVM.ViewModels
             }
         }
 
+        private async Task WaitBeforeNextScrape(int waitSeconds, string infoText, string taskCanceledText = "Vorgang abgebrochen.")
+        {
+            try
+            {
+                for (int i = waitSeconds; i >= 0; i--)
+                {
+                    ParkrunInfo = infoText + $"{i} Sekunden.";
+                    await Task.Delay(1000, cts.Token);
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                if (Application.Current?.MainPage != null)
+                    await Application.Current.MainPage.DisplayAlert("Hinweis", taskCanceledText, "OK");
+            }
+        }
+
+        
+
         public async void DeleteTable()
         {
             bool confirm = await Shell.Current.DisplayAlert(
@@ -489,10 +546,16 @@ namespace Parkrun_View.MVVM.ViewModels
                             {
                                 waitTime = new Random().Next(60, 80); // Zufällige Wartezeit 
                             }
+
+
                             //Console.WriteLine($"403 Forbidden – Warte {waitTime} Sekunden und versuche mit neuem User-Agent erneut...");
                             //ParkrunInfo = "Statuscode: " + response.StatusCode + " – Warten Sie bitte " + waitTime + " Sekunden. Es wird danach erneut versucht.";
-                            ParkrunInfo = $"Die Verbindung konnte nicht hergestellt werden. In {waitTime} Sekunden wird ein neuer Versuch gestartet.";
-                            await Task.Delay(TimeSpan.FromSeconds(waitTime));
+                            //ParkrunInfo = $"Die Verbindung konnte nicht hergestellt werden. In {waitTime} Sekunden wird ein neuer Versuch gestartet.";
+                            //await Task.Delay(TimeSpan.FromSeconds(waitTime));
+
+                            await WaitBeforeNextScrape(waitTime, "Die Verbindung konnte nicht hergestellt werden. Es wird ein neuer Versuch gestartet in ");
+
+
                             tryCount++;
                             continue;
                         }
