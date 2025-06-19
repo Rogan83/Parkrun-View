@@ -390,6 +390,9 @@ namespace Parkrun_View.MVVM.ViewModels
 
             IsScrapping = false; // Setze den Status zurück, wenn die Datenextraktion abgeschlossen ist
 
+            toogleUpdateButton = true; // Setze den Status des Buttons auf "Aktualisieren" zurück
+            UpdateDatabaseButtonText = updateDatabaseText;  // Wenn der Button gedrückt wird, dann wird der Text auf "Aktualisiere Datenbank" geändert.
+
 
             // Berechnet die Gesamtanzahl der Parkruns basierend auf dem Datum des ersten Parkruns in Deutschland
             int CalculateTotalRuns(string location)
@@ -478,7 +481,6 @@ namespace Parkrun_View.MVVM.ViewModels
                     await Application.Current.MainPage.DisplayAlert("Hinweis", taskCanceledText, "OK");
             }
         }
-
         
 
         public async void DeleteTable()
