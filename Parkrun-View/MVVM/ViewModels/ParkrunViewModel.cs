@@ -59,8 +59,16 @@ namespace Parkrun_View.MVVM.ViewModels
         string cancelUpdateText = "Abbrechen"; // Text für den Button, der das Aktualisieren abbricht. Wird beim Toggeln "UpdateDatabaseText" zugewiesen.
 
         public string ParkrunInfo { get; set; } = string.Empty; // Info für den User, von welcher Seite von der Webseite geladen werden.
+
+
+        // Wenn keine Daten vorhanden sind, dann sollen die Flags dementsprechend zugewiesen werden und der passende Text dazu in der dazugehörigen xaml ausgegeben werden.
+        public bool isDataEmpty { get; set; }
+        public bool isDataAvailable { get; set; }
+
         public bool IsScrapping { get; set; } = false;          // Wenn true, dann wird von der Webseite Daten extrahiert.
         public bool IsScrappingProgressEnabled { get; set; } = false;
+
+       
 
         bool toogleUpdateButton = true; // Wenn true, dann wird beim Button der Text "Aktualisiere Datenbank" angezeigt. Anderfalls "Abbrechen".
 
@@ -122,6 +130,25 @@ namespace Parkrun_View.MVVM.ViewModels
                     Data.Add(pending);
             }
             pendingEntries.Clear(); // Warteschlange leeren
+
+            SetContentVisibility();
+        }
+
+        /// <summary>
+        /// Zeigt das Label "Keine Daten vorhanden" an, indem die IsVisible-Eigenschaft auf true gesetzt wird, falls keine Daten vorliegen.
+        /// </summary>
+        public void SetContentVisibility()
+        {
+            if (Data != null && Data.Count() > 0)
+            {
+                isDataAvailable = true;
+                isDataEmpty = false;
+            }
+            else
+            {
+                isDataAvailable = false;
+                isDataEmpty = true;
+            }
         }
 
         public ParkrunViewModel()

@@ -51,6 +51,7 @@ public partial class ChartPage : ContentPage
                 //chartViewModel.UpdateChartDimensions();
                 chartViewModel.UpdateChart();
                 chartViewModel.InitPeriod();
+                chartViewModel.SetContentVisibility();
             }
         }
     }

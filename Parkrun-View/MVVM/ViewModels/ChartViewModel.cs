@@ -30,7 +30,7 @@ namespace Parkrun_View.MVVM.ViewModels
             set 
             {
                 dateStart = value;
-                FilterDataByDate();
+                FilterDataByPeriod();
             } 
         }
 
@@ -42,7 +42,7 @@ namespace Parkrun_View.MVVM.ViewModels
             set
             {
                 dateEnd = value;
-                FilterDataByDate();
+                FilterDataByPeriod();
             }
         }
 
@@ -53,9 +53,16 @@ namespace Parkrun_View.MVVM.ViewModels
         public bool IsToManyData { get; set; }  // Wenn zu viele Daten vorhanden sind, dann gibt es die Möglichkeit zwischen einer kompakten und einer detaillierten Ansicht zu wechseln.
         bool isCompactView = false;
         public string IsCompleteLabelName { get; set; } = "Detailansicht"; // Label für die Ansicht
+
+        // Wenn keine Daten vorhanden sind, dann sollen die Flags dementsprechend zugewiesen werden und der passende Text dazu in der dazugehörigen xaml ausgegeben werden.
+        public bool isDataEmpty { get; set; }
+        public bool isDataAvailable { get; set; }
+
+
         public ICommand ToggleViewModus { get; set; }
       
         public ICommand GoToSettingsCommand { get; } = NavigationHelper.GoToSettingsCommand;
+
         public ChartViewModel(DateTime dateStart = default)
         {
             LineChart = new LineChart();
@@ -65,17 +72,17 @@ namespace Parkrun_View.MVVM.ViewModels
                 isCompactView = !isCompactView;
                 IsCompleteLabelName = isCompactView ? "Kompaktansicht" : "Detailansicht";
 
-                //UpdateChartDimensions(); // Breite aktualisieren
                 UpdateChart();
             });
 
             DeviceDisplay.Current.MainDisplayInfoChanged += OnDisplayChanged;
             DateStart = dateStart;
+
+            SetContentVisibility();
         }
         //Wird ausgerufen, wenn das DisplayInfo sich ändert, z.B. bei der Drehung des Bildschirms
         void OnDisplayChanged(object? sender, DisplayInfoChangedEventArgs e)
         {
-            //UpdateChartDimensions(); // Aktualisiert die Breite auch nach dem drehen des Bildschirms
             UpdateChart();
         }
 
@@ -250,9 +257,26 @@ namespace Parkrun_View.MVVM.ViewModels
             isInitPeriod = true; // Periode wurde initialisiert
         }
 
-        void FilterDataByDate()
+        /// <summary>
+        /// Zeigt das Label "Keine Daten vorhanden" an, indem die IsVisible-Eigenschaft auf true gesetzt wird, falls keine Daten vorliegen.
+        /// </summary>
+        public void SetContentVisibility()
         {
-            if (!isInitPeriod) // Wenn die Periode noch nicht initialisiert wurde, dann wird sie initialisiert
+            if (DataPeriod != null && DataPeriod.Count() > 0)
+            {
+                isDataAvailable = true;
+                isDataEmpty = false;
+            }
+            else
+            {
+                isDataAvailable = false;
+                isDataEmpty = true;
+            }
+        }
+
+        void FilterDataByPeriod()
+        {
+            if (!isInitPeriod) //Die InitPeriode muss zuerst ausgeführt werden, damit die Start- und Enddaten gesetzt werden können.
             {
                 return;
             }
@@ -262,6 +286,8 @@ namespace Parkrun_View.MVVM.ViewModels
                 DataPeriod = Data.Where(d => d.Date >= DateStart && d.Date <= DateEnd).ToList();
                 UpdateChart();
             }
+
+            SetContentVisibility();
         }
     }
 }

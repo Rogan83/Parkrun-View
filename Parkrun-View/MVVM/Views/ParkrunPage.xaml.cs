@@ -40,6 +40,8 @@ public partial class ParkrunPage : ContentPage
                                        .OrderBy(x => x.Date);
 
                 parkrunViewModel.Data = new System.Collections.ObjectModel.ObservableCollection<ParkrunData>(filteredData);
+
+                parkrunViewModel.SetContentVisibility();
             }
         }
     }

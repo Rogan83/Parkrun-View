@@ -27,79 +27,48 @@
                 />
             </Grid>
 
-
-        <!--<HorizontalStackLayout Grid.Row="1" Grid.ColumnSpan="3" HorizontalOptions="Center">
-            -->
-        <!-- Datum Auswahl -->
-        <!--
-            <VerticalStackLayout HorizontalOptions="Center" Grid.Column="0">
-                <Label Text="Datum" VerticalOptions="Center" TextDecorations="Underline" FontAttributes="Bold"/>
-                <DatePicker Date="{Binding SelectedDate}" VerticalOptions="Center" HeightRequest="50"/>
-            </VerticalStackLayout>
-
-            -->
-        <!-- Zeit Auswahl -->
-        <!--
-            <HorizontalStackLayout HorizontalOptions="Center" Grid.Column="1">
-                <VerticalStackLayout>
-                    <Label Text="Stunde" TextDecorations="Underline" FontAttributes="Bold"/>
-                    <Picker ItemsSource="{Binding Hours}" SelectedItem="{Binding SelectedHour}" WidthRequest="80" HeightRequest="50"/>
-                </VerticalStackLayout>
-
-                <VerticalStackLayout>
-                    <Label Text="Minute" TextDecorations="Underline" FontAttributes="Bold"/>
-                    <Picker ItemsSource="{Binding Minutes}" SelectedItem="{Binding SelectedMinute}" WidthRequest="80" HeightRequest="50"/>
-                </VerticalStackLayout>
-
-                <VerticalStackLayout>
-                    <Label Text="Sekunde" TextDecorations="Underline" FontAttributes="Bold"/>
-                    <Picker ItemsSource="{Binding Seconds}" SelectedItem="{Binding SelectedSecond}" WidthRequest="80" HeightRequest="50"/>
-                </VerticalStackLayout>
-            </HorizontalStackLayout>
-
-             -->
-        <!--Daten hinzufügen Button-->
-        <!-- 
-            <Button Text="+" Grid.Row="1"  Grid.Column="2"
-                Command="{Binding AddDataCommand}" 
-                HeightRequest="50" WidthRequest="50" 
-                HorizontalOptions="Center" VerticalOptions="Center"/>
-
-    </HorizontalStackLayout>-->
-
-
         <!-- Datenanzeige -->
-
-        <ScrollView Grid.Row="1" Margin="0,20,0,20" Grid.ColumnSpan="3">
-            <CollectionView ItemsSource="{Binding Data}" Margin="0,0,0,10">
-                <!-- Spaltenüberschriften -->
-                <CollectionView.Header>
-                    <Grid ColumnDefinitions="1*,1*,1.5*" Margin="5">
-                        <Label Text="Datum:" FontAttributes="Bold"  Grid.Column="0" HorizontalOptions="Center" 
-                               TextDecorations="Underline" FontSize="{Binding Source={RelativeSource AncestorType={x:Type viewModels:ParkrunViewModel}},Path=FontSize}"/>
-                        <Label Text="Zeit:" FontAttributes="Bold"  Grid.Column="1" HorizontalOptions="Center" 
-                               TextDecorations="Underline" FontSize="{Binding Source={RelativeSource AncestorType={x:Type viewModels:ParkrunViewModel}},Path=FontSize}"/>
-                        <Label Text="Track:" FontAttributes="Bold"  Grid.Column="2" HorizontalOptions="Center" 
-                               TextDecorations="Underline" FontSize="{Binding Source={RelativeSource AncestorType={x:Type viewModels:ParkrunViewModel}},Path=FontSize}"/>
-                    </Grid>
-                </CollectionView.Header>
-
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
+        <ScrollView Grid.Row="1" Margin="0,20,0,20" Grid.ColumnSpan="3" >
+            <VerticalStackLayout>
+                <CollectionView ItemsSource="{Binding Data}" Margin="0,0,0,10" IsVisible="{Binding IsDataAvailable}">
+                    <!-- Spaltenüberschriften -->
+                    <CollectionView.Header>
                         <Grid ColumnDefinitions="1*,1*,1.5*" Margin="5">
-                            <Label Text="{Binding Date, StringFormat='{0:dd.MM.yyyy}'}" Grid.Column="0" Margin="10" HorizontalOptions="Center" 
-                                   FontSize="{Binding Source={RelativeSource AncestorType={x:Type viewModels:ParkrunViewModel}},Path=FontSize}"/>
-                            <Label Text="{Binding Time}" Grid.Column="1" Margin="10" HorizontalOptions="Center" 
-                                   FontSize="{Binding Source={RelativeSource AncestorType={x:Type viewModels:ParkrunViewModel}},Path=FontSize}"/>
-                            <Label Text="{Binding TrackName}" Grid.Column="2" Margin="10" HorizontalOptions="Center" 
-                                   FontSize="{Binding Source={RelativeSource AncestorType={x:Type viewModels:ParkrunViewModel}},Path=FontSize}"/>
+                            <Label Text="Datum:" FontAttributes="Bold"  Grid.Column="0" HorizontalOptions="Center" 
+                                   TextDecorations="Underline" FontSize="{Binding Source={RelativeSource AncestorType={x:Type viewModels:ParkrunViewModel}},Path=FontSize}"/>
+                            <Label Text="Zeit:" FontAttributes="Bold"  Grid.Column="1" HorizontalOptions="Center" 
+                                   TextDecorations="Underline" FontSize="{Binding Source={RelativeSource AncestorType={x:Type viewModels:ParkrunViewModel}},Path=FontSize}"/>
+                            <Label Text="Track:" FontAttributes="Bold"  Grid.Column="2" HorizontalOptions="Center" 
+                                   TextDecorations="Underline" FontSize="{Binding Source={RelativeSource AncestorType={x:Type viewModels:ParkrunViewModel}},Path=FontSize}"/>
                         </Grid>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
+                    </CollectionView.Header>
+
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid ColumnDefinitions="1*,1*,1.5*" Margin="5">
+                                <Label Text="{Binding Date, StringFormat='{0:dd.MM.yyyy}'}" Grid.Column="0" Margin="10" HorizontalOptions="Center" 
+                                       FontSize="{Binding Source={RelativeSource AncestorType={x:Type viewModels:ParkrunViewModel}},Path=FontSize}"/>
+                                <Label Text="{Binding Time}" Grid.Column="1" Margin="10" HorizontalOptions="Center" 
+                                       FontSize="{Binding Source={RelativeSource AncestorType={x:Type viewModels:ParkrunViewModel}},Path=FontSize}"/>
+                                <Label Text="{Binding TrackName}" Grid.Column="2" Margin="10" HorizontalOptions="Center" 
+                                       FontSize="{Binding Source={RelativeSource AncestorType={x:Type viewModels:ParkrunViewModel}},Path=FontSize}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <!--Wenn keine Daten vorhanden sind, soll dieser Text erscheinen-->
+                <Label Grid.Row="1" Margin="0,20,0,20" Grid.ColumnSpan="3" IsVisible="{Binding isDataEmpty}"
+                       HorizontalOptions="Center" VerticalOptions="Center" 
+                       FontAttributes="Bold" FontSize="Large"
+                       TextColor="DarkGrey"
+                       Text="Keine Daten vorhanden"/>
+            </VerticalStackLayout>
         </ScrollView>
 
-        <!--IsEnabled="{Binding IsScrappingButtonDisabled}"-->
+        
+
+
         <VerticalStackLayout Grid.Row="2" Grid.ColumnSpan="3" Margin="10">
             
             <ProgressBar 

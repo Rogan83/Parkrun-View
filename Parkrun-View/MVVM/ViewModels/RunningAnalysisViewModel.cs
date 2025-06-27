@@ -46,6 +46,10 @@ namespace Parkrun_View.MVVM.ViewModels
         public int WorstTimeInMinutes { get; set; }
         public int WorstTimeInSeconds { get; set; }
 
+        // Wenn keine Daten vorhanden sind, dann sollen die Flags dementsprechend zugewiesen werden und der passende Text dazu in der dazugehörigen xaml ausgegeben werden.
+        public bool isDataEmpty { get; set; }
+        public bool isDataAvailable { get; set; }
+
         public ICommand CreateAnalysis { get; }
 
         public ICommand GoToSettingsCommand { get; } = NavigationHelper.GoToSettingsCommand;
@@ -56,8 +60,12 @@ namespace Parkrun_View.MVVM.ViewModels
             {
                 CalculateStatistics();
             });
-        }
 
+            SetContentVisibility();
+        }
+        /// <summary>
+        /// Zeigt das Label "Keine Daten vorhanden" an, indem die IsVisible-Eigenschaft auf true gesetzt wird, falls keine Daten vorliegen.
+        /// </summary>
         public void CalculateStatistics()
         {
             if (Data.Count > 0 && parkrunIndex < Data.Count)
@@ -72,6 +80,8 @@ namespace Parkrun_View.MVVM.ViewModels
                 MinKmH = Data.Min(d => d.DistanceKm / d.Time.TotalHours);
                 BestTimeMS = Data.Min(d => d.DistanceKm * 1000 / d.Time.TotalSeconds);
             }
+            
+            
 
             void CalculateTimes()
             {
@@ -84,6 +94,20 @@ namespace Parkrun_View.MVVM.ViewModels
                 WorstTimeInHours = (int)worstTime;
                 WorstTimeInMinutes = (int)((worstTime - WorstTimeInHours) * 60);
                 WorstTimeInSeconds = (int)((worstTime - WorstTimeInHours - (WorstTimeInMinutes / 60d)) * 3600);
+            }
+        }
+
+        public void SetContentVisibility()
+        {
+            if (Data != null && Data.Count() > 0)
+            {
+                isDataAvailable = true;
+                isDataEmpty = false;
+            }
+            else
+            {
+                isDataAvailable = false;
+                isDataEmpty = true;
             }
         }
     }

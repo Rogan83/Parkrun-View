@@ -39,6 +39,8 @@ public partial class RunningAnalysisPage : ContentPage
             }
 
             runningAnalysisViewModel.CalculateStatistics();
+
+            runningAnalysisViewModel.SetContentVisibility();
         }
     }
 }
