@@ -66,9 +66,10 @@ namespace Parkrun_View.MVVM.ViewModels
         public bool isDataAvailable { get; set; }
 
         public bool IsScrapping { get; set; } = false;          // Wenn true, dann wird von der Webseite Daten extrahiert.
-        public bool IsScrappingProgressEnabled { get; set; } = false;
+        public bool isFetchDataFromDatabase { get; set; } = false;            // Wenn true, dann wird der Lade-Spinner angezeigt, der signalisiert, dass die Daten von der Datenbank geladen werden. 
+        public bool isUpdateDataFromWebsite { get; set; } = false;            // Wenn true, dann wird der Lade-Spinner angezeigt, der signalisiert, dass die Daten von der Datenbank geladen werden. 
 
-       
+
 
         bool toogleUpdateButton = true; // Wenn true, dann wird beim Button der Text "Aktualisiere Datenbank" angezeigt. Anderfalls "Abbrechen".
 
@@ -101,6 +102,10 @@ namespace Parkrun_View.MVVM.ViewModels
 
         public async Task LoadDataAsync()
         {
+            // aktiviert den Lade-Spinner, der signalisiert, dass die Daten von der Datenbank geladen werden.
+            isDataAvailable = false;
+            isFetchDataFromDatabase = true;
+
             if (Preferences.Get("ParkrunnerName", string.Empty) != string.Empty)
             {
                 ParkrunnerName = Preferences.Get("ParkrunnerName", string.Empty);
@@ -132,6 +137,10 @@ namespace Parkrun_View.MVVM.ViewModels
             pendingEntries.Clear(); // Warteschlange leeren
 
             SetContentVisibility();
+
+            // Wenn die Daten geladen wurden, dann wird der Lade-Spinner deaktiviert
+            isDataAvailable = true;
+            isFetchDataFromDatabase = false;
         }
 
         /// <summary>
@@ -187,8 +196,11 @@ namespace Parkrun_View.MVVM.ViewModels
                     toogleUpdateButton = false;
                     UpdateDatabaseButtonText = cancelUpdateText;  // Wenn der Button gedrückt wird, dann wird der Text auf "Abbrechen" geändert.
 
-                    await ScrapeParkrunDataAsync(ParkrunnerName);
-                    await LoadDataAsync();
+                    bool isNewDataAvailable = await ScrapeParkrunDataAsync(ParkrunnerName);
+                    if (isNewDataAvailable) 
+                    {
+                        await LoadDataAsync();
+                    }
                 }
                 else
                 {
@@ -198,7 +210,7 @@ namespace Parkrun_View.MVVM.ViewModels
                     // Abbrechen des Scrappens, falls der User es wünscht.
                     if (cts != null && !cts.IsCancellationRequested)
                     {
-                        IsScrappingProgressEnabled = false; // Deaktiviere die Anzeige für den Status der Fortschrittsanzeige 
+                        isUpdateDataFromWebsite = false; // Deaktiviere die Anzeige für den Status der Fortschrittsanzeige 
                         cts.Cancel();
                     }
                 }
@@ -219,7 +231,7 @@ namespace Parkrun_View.MVVM.ViewModels
             {
                 if (cts != null && !cts.IsCancellationRequested)
                 {
-                    IsScrappingProgressEnabled = false; // Deaktiviere die Anzeige für den Status der Fortschrittsanzeige 
+                    isUpdateDataFromWebsite = false; // Deaktiviere die Anzeige für den Status der Fortschrittsanzeige 
                     cts.Cancel();
                 }
             });
@@ -241,7 +253,7 @@ namespace Parkrun_View.MVVM.ViewModels
         bool isURLValid = true; // Variable, um zu überprüfen, ob die URL gültig ist. Wird für den Fortschritt benötigt.
         private CancellationTokenSource cts; // Variable, um den Task des Scrappens abzubrechen, falls der User es wünscht.
 
-        public async Task ScrapeParkrunDataAsync(string searchName)
+        public async Task<bool> ScrapeParkrunDataAsync(string searchName)
         {
             cts = new CancellationTokenSource();        // Wird verwendet, um den Task des Scrappens abzubrechen, falls der User es wünscht.
 
@@ -249,8 +261,8 @@ namespace Parkrun_View.MVVM.ViewModels
             var data = await DatabaseService.GetDataAsync();
 
             IsScrapping = true; // Setze den Status auf "Daten werden von der Webseite extrahiert"
-            bool isScrapSuccess = false; // Variable, um den Erfolg des Scrappens zu verfolgen
-            IsScrappingProgressEnabled = true;
+            bool isScrappingSuccess = false; // Variable, um den Erfolg des Scrappens zu verfolgen
+            isUpdateDataFromWebsite = true;
 
             List<string> parkrunLocations = GetParkrunLocations();
 
@@ -279,8 +291,6 @@ namespace Parkrun_View.MVVM.ViewModels
             else
                 ParkrunInfo = "Keine Parkrun-Standorte ausgewählt. Bitte gehe zu den Einstellungen und wähle mindestens einen Parkrun-Standort aus.";
 
-           
-
             foreach (var location in parkrunLocations)
             {
                 int nextParkrunNr = data.Any(x => x.TrackName == location) ? data
@@ -296,7 +306,7 @@ namespace Parkrun_View.MVVM.ViewModels
                     // Prüfe, ob der Task abgebrochen wurde
                     if (cts != null && cts.IsCancellationRequested)
                     {
-                        return; // Beende die Schleife, wenn der Task abgebrochen wurde
+                        return true; // Beende die Schleife, wenn der Task abgebrochen wurde
                     }
 
                     string url = $"https://www.parkrun.com.de/{location}/results/{run}/";
@@ -319,7 +329,7 @@ namespace Parkrun_View.MVVM.ViewModels
                         if (resultNode != null)
                         {
                             var dataFromWebsite = resultNode.SelectNodes(".//tr");
-                            if (dataFromWebsite == null) { return; }
+                            if (dataFromWebsite == null) { return false; }
 
                             foreach (var trNode in dataFromWebsite) // Punkt vor `//tr` bedeutet "relativ zum aktuellen Node"
                             {
@@ -360,8 +370,7 @@ namespace Parkrun_View.MVVM.ViewModels
                                 //if (name.ToLower() != searchName.ToLower())
                                 //    Data.Add(parkrunData);
 
-                                isScrapSuccess = true;
-
+                                isScrappingSuccess = true;
 
                                 await DatabaseService.SaveDataAsync(parkrunData);
                             }
@@ -385,22 +394,30 @@ namespace Parkrun_View.MVVM.ViewModels
 
 
             } // Ende der foreach-Schleife für die Parkrun-Standorte
-            IsScrappingProgressEnabled = false; // Deaktiviere die Anzeige für den Status der Fortschrittsanzeige 
+            isUpdateDataFromWebsite = false; // Deaktiviere die Anzeige für den Status der Fortschrittsanzeige 
 
+            bool isNewDataAvailable = true;
             if (!isURLValid) // Wenn das Scrappen nicht erfolgreich war
             {
                 //ParkrunInfo = "Es konnte keine Verbindung zur Webseite aufgebaut werden.";
                 if (Application.Current?.MainPage != null)
+                { 
                     await Application.Current.MainPage.DisplayAlert("Fehler", "Es konnte keine Verbindung zur Webseite aufgebaut werden.", "OK");
+                    isNewDataAvailable = false; // Setze den Status auf "Keine neuen Daten verfügbar"
+                }
+
             }
-            else if (!isScrapSuccess)
+            else if (!isScrappingSuccess)
             {
                 //ParkrunInfo = "Es sind keine neuen Daten vorhanden.";
                 if (Application.Current?.MainPage != null)
+                {
                     await Application.Current.MainPage.DisplayAlert("Hinweis", "Es sind keine neuen Daten vorhanden.", "OK");
+                    isNewDataAvailable = false; // Setze den Status auf "Keine neuen Daten verfügbar"
+                }
 
             }
-            else if (isScrapSuccess) // Wenn das Scrappen erfolgreich war
+            else if (isScrappingSuccess) // Wenn das Scrappen erfolgreich war
             {
                 //ParkrunInfo = "Die Datenbank wurde erfolgreich aktualisiert. Es sind " + (totalRuns - currentParkrunNr) + " neue Daten vorhanden.";
                 if (Application.Current?.MainPage != null)
@@ -412,8 +429,6 @@ namespace Parkrun_View.MVVM.ViewModels
                     await Application.Current.MainPage.DisplayAlert("Hinweis", message, "OK");
                 }
             }
-
-
 
             IsScrapping = false; // Setze den Status zurück, wenn die Datenextraktion abgeschlossen ist
 
@@ -472,7 +487,6 @@ namespace Parkrun_View.MVVM.ViewModels
 
                 return currentTime;
             }
-
             TimeSpan FetchBestTime(HtmlNode? timeNode)
             {
                 var rawText = timeNode?.SelectSingleNode(".//div[@class='detailed']")?.InnerText.Trim() ?? TimeSpan.Zero.ToString();
@@ -490,7 +504,10 @@ namespace Parkrun_View.MVVM.ViewModels
 
                 return bestTime;
             }
+
+            return isNewDataAvailable; // Gibt true zurück, wenn neue Daten verfügbar sind, andernfalls false
         }
+
 
         private async Task WaitBeforeNextScrape(int waitSeconds, string infoText, string taskCanceledText = "Vorgang abgebrochen.")
         {

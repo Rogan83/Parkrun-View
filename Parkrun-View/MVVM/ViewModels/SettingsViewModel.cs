@@ -39,6 +39,8 @@ namespace Parkrun_View.MVVM.ViewModels
         public double FontSize { get; set; } = 16; 
         public List<string> FontSizes { get; set; }
 
+        public bool isSaveSettings { get; set; } = false;
+
         public ICommand GoBack { get; } 
 
         public SettingsViewModel()

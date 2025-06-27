@@ -30,9 +30,7 @@
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
                 </CollectionView>
-
             </ScrollView>
-
         </Border>
 
         <Label 
@@ -50,8 +48,6 @@
             BackgroundColor="SlateGray"
             FontSize="{Binding FontSize}"
             />
-
-
         <Button 
             Grid.Row="4"
             Margin="10"

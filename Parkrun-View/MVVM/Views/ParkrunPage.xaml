@@ -63,25 +63,28 @@
                        FontAttributes="Bold" FontSize="Large"
                        TextColor="DarkGrey"
                        Text="Keine Daten vorhanden"/>
+                
+                <!-- Ladeanzeige -->
+                <ActivityIndicator Grid.Row="1" Margin="0,20,0,20" Grid.ColumnSpan="3" IsVisible="{Binding isFetchDataFromDatabase}" 
+                       IsRunning="{Binding isFetchDataFromDatabase}" 
+                       Color="DarkGrey"
+                       />
             </VerticalStackLayout>
         </ScrollView>
 
-        
-
 
         <VerticalStackLayout Grid.Row="2" Grid.ColumnSpan="3" Margin="10">
-            
             <ProgressBar 
                 Progress="{Binding Progress}" 
-                IsVisible="{Binding IsScrappingProgressEnabled}"/>
-            
-            <ActivityIndicator IsRunning="{Binding IsScrappingProgressEnabled}" 
-                   IsVisible="{Binding IsScrappingProgressEnabled}" 
+                IsVisible="{Binding isUpdateDataFromWebsite}"/>
+
+            <ActivityIndicator IsRunning="{Binding isUpdateDataFromWebsite}" 
+                   IsVisible="{Binding isUpdateDataFromWebsite}" 
                    Color="DarkRed"
                    Margin="10"/>
 
             <Label Text="{Binding ParkrunInfo}" BackgroundColor="AntiqueWhite"  TextColor="Red" HorizontalOptions="Center" 
-                   FontSize="{Binding FontSize}" IsVisible="{Binding IsScrappingProgressEnabled}" Margin="10" Padding="10"/>
+                   FontSize="{Binding FontSize}" IsVisible="{Binding isUpdateDataFromWebsite}" Margin="10" Padding="10"/>
 
             <HorizontalStackLayout Grid.ColumnSpan="3" HorizontalOptions="Center">
 
