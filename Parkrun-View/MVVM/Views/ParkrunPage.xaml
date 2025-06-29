@@ -64,16 +64,16 @@
                        TextColor="DarkGrey"
                        Text="Keine Daten vorhanden"/>
                 
-                <!-- Ladeanzeige -->
-                <ActivityIndicator Grid.Row="1" Margin="0,20,0,20" Grid.ColumnSpan="3" IsVisible="{Binding isFetchDataFromDatabase}" 
-                       IsRunning="{Binding isFetchDataFromDatabase}" 
-                       Color="DarkGrey"
-                       />
+                
             </VerticalStackLayout>
         </ScrollView>
 
 
         <VerticalStackLayout Grid.Row="2" Grid.ColumnSpan="3" Margin="10">
+            <!-- Ladeanzeige -->
+            <ActivityIndicator Grid.Row="1" Margin="0,20,0,20" Grid.ColumnSpan="3" IsVisible="{Binding isFetchDataFromDatabase}" 
+                IsRunning="{Binding isFetchDataFromDatabase}" 
+                Color="DarkGrey"/>
             <ProgressBar 
                 Progress="{Binding Progress}" 
                 IsVisible="{Binding isUpdateDataFromWebsite}"/>
@@ -97,6 +97,7 @@
                     Command="{Binding DeleteTableCommand}"  Margin="10" FontSize="{Binding FontSize}"
                     HorizontalOptions="Center" />
 
+                
                 <!--<Button Text="Abbrechen"  TextColor="DarkRed" BackgroundColor="RosyBrown"
                     Command="{Binding CancelUpdateDataCommand}"  Margin="10" FontSize="{Binding FontSize}"
                     HorizontalOptions="Center" />-->   
@@ -104,6 +105,11 @@
 
             </HorizontalStackLayout>
             
+            <!-- Ladeanzeige -->
+            <ActivityIndicator  IsVisible="{Binding IsLoading}" 
+               IsRunning="{Binding IsLoading}" 
+               Color="DarkGreen"
+               />
         </VerticalStackLayout>
     </Grid>
 </ContentPage>

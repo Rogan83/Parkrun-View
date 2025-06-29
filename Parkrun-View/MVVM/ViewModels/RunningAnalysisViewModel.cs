@@ -1,4 +1,5 @@
 ﻿using Parkrun_View.MVVM.Helpers;
+using Parkrun_View.MVVM.Interfaces;
 using Parkrun_View.MVVM.Models;
 using PropertyChanged;
 using System;
@@ -11,7 +12,7 @@ using System.Windows.Input;
 namespace Parkrun_View.MVVM.ViewModels
 {
     [AddINotifyPropertyChangedInterface]
-    internal class RunningAnalysisViewModel
+    internal class RunningAnalysisViewModel : ILoadableViewModel
     {
         public List<ParkrunData> Data { get; set; } = new List<ParkrunData>();
 
@@ -49,6 +50,8 @@ namespace Parkrun_View.MVVM.ViewModels
         // Wenn keine Daten vorhanden sind, dann sollen die Flags dementsprechend zugewiesen werden und der passende Text dazu in der dazugehörigen xaml ausgegeben werden.
         public bool isDataEmpty { get; set; }
         public bool isDataAvailable { get; set; }
+
+        public bool IsLoading { get; set; } // Wenn true, dann wird der Ladespinner angezeigt, wenn die Seite verlassen wird
 
         public ICommand CreateAnalysis { get; }
 

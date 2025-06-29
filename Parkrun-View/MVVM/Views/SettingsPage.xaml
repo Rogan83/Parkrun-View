@@ -9,7 +9,7 @@
         <ToolbarItem IconImageSource="parkrunlogo.png" />
     </ContentPage.ToolbarItems>
     
-    <Grid RowDefinitions="auto,*,auto,auto,auto">
+    <Grid RowDefinitions="auto,*,auto,auto,auto,auto">
         <Label Text="Wähle hier deine Strecken aus, die dich interessieren" HorizontalOptions="Center" Margin="10" FontSize="Large"/>
         <Border Grid.Row="1" Padding="10" StrokeThickness="20" Stroke="DimGrey">
             <ScrollView 
@@ -56,5 +56,9 @@
             FontSize="{Binding FontSize}"
             HorizontalOptions="Center" 
             BackgroundColor="Green"/>
+        <!-- Ladeanzeige -->
+        <ActivityIndicator Grid.Row="5" IsVisible="{Binding IsLoading}" 
+           IsRunning="{Binding IsLoading}" 
+           Color="DarkGreen"/>
     </Grid>
 </ContentPage>

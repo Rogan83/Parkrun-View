@@ -1,3 +1,4 @@
+using Parkrun_View.MVVM.Helpers;
 using Parkrun_View.MVVM.Models;
 using Parkrun_View.MVVM.ViewModels;
 using Parkrun_View.Services;
@@ -25,34 +26,11 @@ public partial class ChartPage : ContentPage
         if (BindingContext is ChartViewModel chartViewModel)
         {
             chartViewModel.FontSize = Preferences.Get("selectedFontSize", 16.0); // Schriftgröße aus den Einstellungen laden
+            chartViewModel.DataPeriod = chartViewModel.Data = NavigationHelper.Data.ToList(); // Verweis auf die Daten, die von der Datenbank geladen wurden. Wird in der NavigationHelper-Klasse gespeichert, um von anderen ViewModels darauf zuzugreifen.
 
-            var data = DatabaseService.GetDataSync();
-            if (data != null)
-            {
-                string parkrunnerName = string.Empty;
-                if (Preferences.Get("ParkrunnerName", string.Empty) != string.Empty)
-                {
-                    parkrunnerName = Preferences.Get("ParkrunnerName", string.Empty);
-                }
-
-                // Filter nun die Daten von allen Standorten, die in den Einstellungen ausgewählt wurden
-                string[] tracks = Preferences.Get("SelectedTracks", string.Empty).Split(",");
-                List<ParkrunData> filteredDataByTrack = new List<ParkrunData>();
-                foreach (var track in tracks)
-                {
-                    var temp = data.Where(x => x.TrackName.ToLower() == track.ToLower());
-                    filteredDataByTrack.AddRange(temp);
-                }
-
-                // Filter nur die Daten vom Namen des Parkrunners heraus
-                var filteredData = filteredDataByTrack.Where(x => x.Name.ToLower() == parkrunnerName);
-
-                chartViewModel.DataPeriod = chartViewModel.Data = new ObservableCollection<ParkrunData>(filteredData).ToList();
-                //chartViewModel.UpdateChartDimensions();
-                chartViewModel.UpdateChart();
-                chartViewModel.InitPeriod();
-                chartViewModel.SetContentVisibility();
-            }
+            chartViewModel.UpdateChart();
+            chartViewModel.InitPeriod();
+            chartViewModel.SetContentVisibility();
         }
     }
 

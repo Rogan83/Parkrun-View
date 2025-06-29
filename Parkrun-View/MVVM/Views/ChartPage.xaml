@@ -9,7 +9,7 @@
     </ContentPage.ToolbarItems>
 
 
-    <Grid RowDefinitions="auto,auto,auto">
+    <Grid RowDefinitions="auto,auto,auto,auto">
         <VerticalStackLayout  Grid.Row="0" >
             <Grid ColumnDefinitions="3*,1*" HorizontalOptions="Center">
                 <!--<Label 
@@ -48,7 +48,7 @@
 
 
         </VerticalStackLayout>
-        
+
         <Border Grid.Row="1" Stroke="Black" StrokeThickness="2" Background="LightGray" Padding="10" HorizontalOptions="Center"
               IsVisible="{Binding IsToManyData}">
             <Border.StrokeShape>
@@ -71,12 +71,16 @@
             </HorizontalStackLayout>
         </Border>
 
-       
         <ScrollView Orientation="Horizontal" Grid.Row="2" Margin="10" IsVisible="{Binding isDataAvailable}">
             <microcharts:ChartView Chart="{Binding LineChart}" HeightRequest="{Binding ChartHeight}" WidthRequest="{Binding ChartWidth}" Margin="0,10,0,0"/>
         </ScrollView>
         
         <Label Grid.Row="2" Margin="0,20,0,20" HorizontalOptions="Center" VerticalOptions="Center" 
                IsVisible="{Binding isDataEmpty}" Text="Keine Daten vorhanden." FontSize="{Binding FontSize}" TextColor="DarkGrey"/>
+
+        <!--Ladeanzeige-->
+        <ActivityIndicator Grid.Row="3" IsVisible="{Binding IsLoading}" 
+               IsRunning="{Binding IsLoading}" 
+               Color="DarkGreen"/>
     </Grid>
 </ContentPage>

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Parkrun_View.MVVM.Models
 {
-    internal class ParkrunData
+    public class ParkrunData
     {
         [PrimaryKey, AutoIncrement]
         public int Id { get; set; }

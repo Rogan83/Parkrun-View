@@ -172,6 +172,11 @@
                 </VerticalStackLayout>
             </FlexLayout>
 
+            <!-- Ladeanzeige -->
+            <ActivityIndicator  IsVisible="{Binding IsLoading}" 
+               IsRunning="{Binding IsLoading}" 
+               Color="DarkGreen"
+               />
         </VerticalStackLayout>
         
         <Label 

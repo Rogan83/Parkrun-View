@@ -1,6 +1,8 @@
+using Parkrun_View.MVVM.Helpers;
 using Parkrun_View.MVVM.Models;
 using Parkrun_View.MVVM.ViewModels;
 using Parkrun_View.Services;
+using System.Collections.ObjectModel;
 
 namespace Parkrun_View.MVVM.Views;
 
@@ -16,33 +18,23 @@ public partial class ParkrunPage : ContentPage
     {
         base.OnAppearing();
 
-        // Daten neu laden
-        LoadDataSync();
+        _ = LoadDataAsync(); // bewusst ignoriert, aber async sauber
     }
 
-    private void LoadDataSync()
+    private async Task LoadDataAsync()
     {
         if (BindingContext is ParkrunViewModel parkrunViewModel)
         {
             parkrunViewModel.FontSize = Preferences.Get("selectedFontSize", 16.0); // Schriftgröße aus den Einstellungen laden
-            var data = DatabaseService.GetDataSync();
-            if (data != null)
-            {
-                // Hol die gespeicherten Track-Namen aus den Einstellungen
-                var selectedTracks = Preferences.Get("SelectedTracks", string.Empty)
-                                                .Split(',')
-                                                .Select(t => t.Trim())
-                                                .ToList();
+            parkrunViewModel.Data = new ObservableCollection<ParkrunData>();
+            //foreach (var d in NavigationHelper.Data)
+            //{
+            //    parkrunViewModel.Data.Add(d);
+            //    await Task.Delay(parkrunViewModel.Delay); //kleine Pause gibt der UI Zeit zum Rendern
+            //}
 
-                // Filtere die Daten nach Parkrunner-Name UND nach den ausgewählten Tracks
-                var filteredData = data.Where(x => x.Name.ToLower() == parkrunViewModel.ParkrunnerName
-                                                 && selectedTracks.Contains(x.TrackName))
-                                       .OrderBy(x => x.Date);
-
-                parkrunViewModel.Data = new System.Collections.ObjectModel.ObservableCollection<ParkrunData>(filteredData);
-
-                parkrunViewModel.SetContentVisibility();
-            }
+            await parkrunViewModel.LoadDataAsync();
+            parkrunViewModel.SetContentVisibility();
         }
     }
 }

@@ -9,12 +9,13 @@ using System.Windows.Input;
 using Microcharts;
 using SkiaSharp;
 using Parkrun_View.MVVM.Helpers;
-using Parkrun_View.Services;        // Wird für die Grafiken benötigt
+using Parkrun_View.Services;
+using Parkrun_View.MVVM.Interfaces;        // Wird für die Grafiken benötigt
 
 namespace Parkrun_View.MVVM.ViewModels
 {
     [AddINotifyPropertyChangedInterface]
-    internal class ChartViewModel
+    internal class ChartViewModel : ILoadableViewModel
     {
         public List<ParkrunData> Data { get; set; } = new List<ParkrunData>();
         public List<ParkrunData> DataPeriod { get; set; } = new List<ParkrunData>();        // Daten, die für die aktuelle Periode ausgewählt wurden
@@ -58,6 +59,8 @@ namespace Parkrun_View.MVVM.ViewModels
         public bool isDataEmpty { get; set; }
         public bool isDataAvailable { get; set; }
 
+        public bool IsLoading { get; set; }
+
 
         public ICommand ToggleViewModus { get; set; }
       
@@ -65,6 +68,8 @@ namespace Parkrun_View.MVVM.ViewModels
 
         public ChartViewModel(DateTime dateStart = default)
         {
+            DataPeriod  = NavigationHelper.Data.ToList(); // Verweis auf die Daten, die von der Datenbank geladen wurden. Wird in der NavigationHelper-Klasse gespeichert, um von anderen ViewModels darauf zuzugreifen.
+
             LineChart = new LineChart();
 
             ToggleViewModus = new Command((parkrunData) =>

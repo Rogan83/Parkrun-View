@@ -1,6 +1,7 @@
 ﻿using HtmlAgilityPack;
 using Microsoft.Maui.Devices.Sensors;
 using Parkrun_View.MVVM.Helpers;
+using Parkrun_View.MVVM.Interfaces;
 using Parkrun_View.MVVM.Models;
 using Parkrun_View.Services;
 using PropertyChanged;
@@ -22,11 +23,11 @@ using System.Xml;
 namespace Parkrun_View.MVVM.ViewModels
 {
     [AddINotifyPropertyChangedInterface]
-    internal class ParkrunViewModel
+    internal class ParkrunViewModel : ILoadableViewModel
     {
         #region Properties and Fields
         public ObservableCollection<ParkrunData> Data { get; set; } = new();
-        private List<ParkrunData> pendingEntries = new();
+        //private List<ParkrunData> pendingEntries = new();
 
         public double FontSize { get; set; } = 16;
         public DateTime SelectedDate { get; set; } = DateTime.Now.Date;
@@ -38,6 +39,9 @@ namespace Parkrun_View.MVVM.ViewModels
         public int SelectedHour { get; set; }
         public int SelectedMinute { get; set; }
         public int SelectedSecond { get; set; }
+
+
+        public int Delay { get; set; } = 5;     // Zeitverzögerung in ms für das Laden der Daten. Wird in der xaml-Datei verwendet, um die Zeitverzögerung für das Asynchrone Laden der Daten zu setzen, damit die UI sie in der Collection View Schrittweise aktualisieren kann. Standardmäßig auf 5 Sekunden gesetzt.
 
         string parkrunnerName = string.Empty;
 
@@ -69,6 +73,8 @@ namespace Parkrun_View.MVVM.ViewModels
         public bool isFetchDataFromDatabase { get; set; } = false;            // Wenn true, dann wird der Lade-Spinner angezeigt, der signalisiert, dass die Daten von der Datenbank geladen werden. 
         public bool isUpdateDataFromWebsite { get; set; } = false;            // Wenn true, dann wird der Lade-Spinner angezeigt, der signalisiert, dass die Daten von der Datenbank geladen werden. 
 
+        public bool IsLoading { get; set; } // Wenn true, dann wird der Ladespinner angezeigt, wenn die Seite verlassen wird
+
 
 
         bool toogleUpdateButton = true; // Wenn true, dann wird beim Button der Text "Aktualisiere Datenbank" angezeigt. Anderfalls "Abbrechen".
@@ -96,14 +102,15 @@ namespace Parkrun_View.MVVM.ViewModels
 
 
 
-        private bool isDataLoaded = false;
+        //private bool isDataLoaded = false;
         #endregion
-
 
         public async Task LoadDataAsync()
         {
+            Data = NavigationHelper.Data; // Verweis auf die Daten, die von der Datenbank geladen wurden. Wird in der NavigationHelper-Klasse gespeichert, um von anderen ViewModels darauf zuzugreifen.
+
             // aktiviert den Lade-Spinner, der signalisiert, dass die Daten von der Datenbank geladen werden.
-            isDataAvailable = false;
+            isDataAvailable = false;  // aktiviert den Lade-Spinner, der signalisiert, dass die Daten von der Datenbank geladen werden.
             isFetchDataFromDatabase = true;
 
             if (Preferences.Get("ParkrunnerName", string.Empty) != string.Empty)
@@ -116,25 +123,28 @@ namespace Parkrun_View.MVVM.ViewModels
                 ParkrunnerName = Preferences.Get("ParkrunnerName", string.Empty);
             }
 
-            isDataLoaded = false;
+            //isDataLoaded = false;
             Data.Clear();
 
             var data = await DatabaseService.GetDataAsync();
             foreach (var d in data)
             {
                 if (ParkrunnerName.ToLower() == d.Name.ToLower())
+                {
                     Data.Add(d);
+                    await Task.Delay(Delay); //kleine Pause gibt der UI Zeit zum Rendern
+                }
             }
 
-            isDataLoaded = true;
+            //isDataLoaded = true;
 
             // Jetzt füge die zwischengespeicherten neuen Einträge hinzu
-            foreach (var pending in pendingEntries)
-            {
-                if (ParkrunnerName.ToLower() != pending.Name.ToLower())
-                    Data.Add(pending);
-            }
-            pendingEntries.Clear(); // Warteschlange leeren
+            //foreach (var pending in pendingEntries)
+            //{
+            //    if (ParkrunnerName.ToLower() != pending.Name.ToLower())
+            //        Data.Add(pending);
+            //}
+            //pendingEntries.Clear(); // Warteschlange leeren
 
             SetContentVisibility();
 
@@ -162,32 +172,35 @@ namespace Parkrun_View.MVVM.ViewModels
 
         public ParkrunViewModel()
         {
-            AddDataCommand = new Command(async () =>
-            {
-                var parkrunData = new ParkrunData { Date = SelectedDate, Time = SelectedTime, DistanceKm = 5 };
+            NavigationHelper.LoadFilteredParkrunDataSync(); // Lädt die gefilterten Daten von der Datenbank, die von anderen ViewModels verwendet werden können.
+            Data = NavigationHelper.Data; // Verweis auf die Daten, die von der Datenbank geladen wurden. Wird in der NavigationHelper-Klasse gespeichert, um von anderen ViewModels darauf zuzugreifen. 
 
-                await DatabaseService.SaveDataAsync(parkrunData);
+            //AddDataCommand = new Command(async () =>
+            //{
+            //    var parkrunData = new ParkrunData { Date = SelectedDate, Time = SelectedTime, DistanceKm = 5 };
 
-                if (isDataLoaded)
-                {
-                    Data.Add(parkrunData);
-                }
-                else
-                {
-                    pendingEntries.Add(parkrunData);        // Speichere das neue Element temporär, so dass es nach dem Laden der Daten von der Datenbank in der "LoadDataAsync" hinzugefügt wird.
-                }
+            //    await DatabaseService.SaveDataAsync(parkrunData);
 
-                Data = new ObservableCollection<ParkrunData>(Data.OrderBy(d => d.Date));
-            });
+            //    if (isDataLoaded)
+            //    {
+            //        Data.Add(parkrunData);
+            //    }
+            //    else
+            //    {
+            //        pendingEntries.Add(parkrunData);        // Speichere das neue Element temporär, so dass es nach dem Laden der Daten von der Datenbank in der "LoadDataAsync" hinzugefügt wird.
+            //    }
 
-            RemoveDataCommand = new Command<ParkrunData>(async (parkrunData) =>
-            {
-                if (parkrunData != null)
-                {
-                    await DatabaseService.DeleteDataAsync(parkrunData);
-                    Data.Remove(parkrunData);
-                }
-            });
+            //    Data = new ObservableCollection<ParkrunData>(Data.OrderBy(d => d.Date));
+            //});
+
+            //RemoveDataCommand = new Command<ParkrunData>(async (parkrunData) =>
+            //{
+            //    if (parkrunData != null)
+            //    {
+            //        await DatabaseService.DeleteDataAsync(parkrunData);
+            //        Data.Remove(parkrunData);
+            //    }
+            //});
 
             ToogleUpdateButtonCommand = new Command(async () =>
             {
@@ -540,7 +553,7 @@ namespace Parkrun_View.MVVM.ViewModels
             {
                 await DatabaseService.DeleteAllDataAsync();
                 Data = new ObservableCollection<ParkrunData>();
-                pendingEntries.Clear(); // Leere die Warteschlange
+                //pendingEntries.Clear(); // Leere die Warteschlange
             }
         }
 

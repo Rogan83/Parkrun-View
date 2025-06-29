@@ -1,4 +1,5 @@
 ﻿using Parkrun_View.MVVM.Helpers;
+using Parkrun_View.MVVM.Interfaces;
 using PropertyChanged;
 using System;
 using System.Collections.Generic;
@@ -10,8 +11,8 @@ using System.Windows.Input;
 
 namespace Parkrun_View.MVVM.ViewModels
 {
-    [AddINotifyPropertyChangedInterface]
-    public class SettingsViewModel
+    [AddINotifyPropertyChangedInterface] 
+    public class SettingsViewModel : ILoadableViewModel
     {
         public ObservableCollection<TrackModel> AvailableTracks { get; } = new();
 
@@ -40,6 +41,8 @@ namespace Parkrun_View.MVVM.ViewModels
         public List<string> FontSizes { get; set; }
 
         public bool isSaveSettings { get; set; } = false;
+
+        public bool IsLoading { get; set; } // Wenn true, dann wird der Ladespinner angezeigt, wenn die Seite verlassen wird
 
         public ICommand GoBack { get; } 
 
