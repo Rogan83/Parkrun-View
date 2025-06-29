@@ -403,9 +403,8 @@ namespace Parkrun_View.MVVM.ViewModels
                         break;
                     }
                 }
+
                 datacount += (totalRuns - currentParkrunNr);
-
-
             } // Ende der foreach-Schleife für die Parkrun-Standorte
             isUpdateDataFromWebsite = false; // Deaktiviere die Anzeige für den Status der Fortschrittsanzeige 
 
@@ -448,23 +447,14 @@ namespace Parkrun_View.MVVM.ViewModels
             toogleUpdateButton = true; // Setze den Status des Buttons auf "Aktualisieren" zurück
             UpdateDatabaseButtonText = updateDatabaseText;  // Wenn der Button gedrückt wird, dann wird der Text auf "Aktualisiere Datenbank" geändert.
 
-
             // Berechnet die Gesamtanzahl der Parkruns basierend auf dem Datum des ersten Parkruns in Deutschland
             int CalculateTotalRuns(string location)
             {
                 int extraRuns = 1; // Falls extra Läufe stattfanden. Normalerweise finden alle 7 Tage ein Parkrun statt, aber ich vermute, dass min. 1 extra Lauf stattfand. 
 
-                //Dictionary<string, DateTime> firstParkrunDates = new Dictionary<string, DateTime>
-                //{
-                //    { "priessnitzgrund", new DateTime(2022, 7, 9) },    // Das Datum des ersten Parkruns im Prießnitzgrund in Dresden
-                //    { "oberwald", new DateTime(2020, 10, 25) }          // Das Datum des ersten Parkruns im Oberwald in Deutschland
-                //    // Weitere Standorte und deren erste Parkrun-Daten können hier hinzugefügt werden
-                //};
-                //Dictionary<string, DateTime> firstParkrunDates = ParkrunTracks.AvailableTracks.ToDictionary(track => track.TrackNameURL, track => track.FirstParkrunDate);
                 Dictionary<string, DateTime> firstParkrunDates = ParkrunTracks.AvailableTracks
                 .ToDictionary(track => string.IsNullOrEmpty(track.TrackNameURL) ? track.TrackName.ToLower() : track.TrackNameURL,
                               track => track.FirstParkrunDate);
-
 
                 //var firstParkrunDate = new DateTime(2022, 7, 9); // Das Datum des ersten Parkruns in Deutschland beim Prießnitzgrund in der Heide in Dresden
                 DateTime firstParkrunDate = DateTime.MinValue;
@@ -520,7 +510,6 @@ namespace Parkrun_View.MVVM.ViewModels
 
             return isNewDataAvailable; // Gibt true zurück, wenn neue Daten verfügbar sind, andernfalls false
         }
-
 
         private async Task WaitBeforeNextScrape(int waitSeconds, string infoText, string taskCanceledText = "Vorgang abgebrochen.")
         {
@@ -606,14 +595,7 @@ namespace Parkrun_View.MVVM.ViewModels
                                 waitTime = new Random().Next(60, 80); // Zufällige Wartezeit 
                             }
 
-
-                            //Console.WriteLine($"403 Forbidden – Warte {waitTime} Sekunden und versuche mit neuem User-Agent erneut...");
-                            //ParkrunInfo = "Statuscode: " + response.StatusCode + " – Warten Sie bitte " + waitTime + " Sekunden. Es wird danach erneut versucht.";
-                            //ParkrunInfo = $"Die Verbindung konnte nicht hergestellt werden. In {waitTime} Sekunden wird ein neuer Versuch gestartet.";
-                            //await Task.Delay(TimeSpan.FromSeconds(waitTime));
-
                             await WaitBeforeNextScrape(waitTime, "Die Verbindung konnte nicht hergestellt werden. Es wird ein neuer Versuch gestartet in ");
-
 
                             tryCount++;
                             continue;
@@ -627,7 +609,6 @@ namespace Parkrun_View.MVVM.ViewModels
                         Console.WriteLine($"Fehler beim Abrufen der Webseite: {ex.Message}");
                         isURLValid = false; // Variable, um den Erfolg des Scrappens zu verfolgen. Wird für den Fortschritt benötigt.
                         break;
-                        //tryCount++;
                     }
                 }
             }
