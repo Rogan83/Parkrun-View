@@ -26,8 +26,21 @@ namespace Parkrun_View.MVVM.ViewModels
     internal class ParkrunViewModel : ILoadableViewModel
     {
         #region Properties and Fields
+
+        //Text="{Binding ParkrunnerName}"
+        //        ItemsSource="{Binding VorschlagsListe}"
+        //        TextChangedCommand="{Binding VorschlagAktualisierenCommand}"
+        //        SelectedSuggestion="{Binding AusgewählterEintrag}"
+        //        Completed="AutoCompleteEntry_Completed"
+        //        HeightRequest="50" />
+
         public ObservableCollection<ParkrunData> Data { get; set; } = new();
-        //private List<ParkrunData> pendingEntries = new();
+
+        public ObservableCollection<string> SuggestionList { get; set; } = new();
+        
+
+        List<ParkrunData> allData = new List<ParkrunData>();
+
 
         public double FontSize { get; set; } = 16;
         public DateTime SelectedDate { get; set; } = DateTime.Now.Date;
@@ -50,12 +63,31 @@ namespace Parkrun_View.MVVM.ViewModels
             get => parkrunnerName;
             set
             {
-                parkrunnerName = value;
-
-                // Automatisches Speichern in Preferences
-                Preferences.Set("ParkrunnerName", parkrunnerName.ToLower().Trim());
+                if (parkrunnerName != value)
+                {
+                    parkrunnerName = value;
+                }
             }
         }
+
+        private string selectedEntry;
+        public string SelectedEntry
+        {
+            get => selectedEntry;
+            set
+            {
+                if (selectedEntry != value)
+                {
+                    selectedEntry = value;
+
+                    _ = LoadDataAsync();
+
+                    // Automatisches Speichern in Preferences
+                    Preferences.Set("ParkrunnerName", parkrunnerName.ToLower().Trim());
+                }
+            }
+        }
+
 
         public string UpdateDatabaseButtonText { get; set; }
 
@@ -100,6 +132,8 @@ namespace Parkrun_View.MVVM.ViewModels
 
         public ICommand GoToSettingsCommand { get; } = NavigationHelper.GoToSettingsCommand;
 
+        public ICommand SuggestionUpdateCommand { get; }
+
 
 
         //private bool isDataLoaded = false;
@@ -107,29 +141,27 @@ namespace Parkrun_View.MVVM.ViewModels
 
         public async Task LoadDataAsync()
         {
-            Data = NavigationHelper.Data; // Verweis auf die Daten, die von der Datenbank geladen wurden. Wird in der NavigationHelper-Klasse gespeichert, um von anderen ViewModels darauf zuzugreifen.
+            //Data = NavigationHelper.Data; // Verweis auf die Daten, die von der Datenbank geladen wurden. Wird in der NavigationHelper-Klasse gespeichert, um von anderen ViewModels darauf zuzugreifen.
 
             // aktiviert den Lade-Spinner, der signalisiert, dass die Daten von der Datenbank geladen werden.
             isDataAvailable = false;  // aktiviert den Lade-Spinner, der signalisiert, dass die Daten von der Datenbank geladen werden.
             isFetchDataFromDatabase = true;
 
-            if (Preferences.Get("ParkrunnerName", string.Empty) != string.Empty)
-            {
-                ParkrunnerName = Preferences.Get("ParkrunnerName", string.Empty);
-            }
-            else
-            {
-                Preferences.Set("ParkrunnerName", "");
-                ParkrunnerName = Preferences.Get("ParkrunnerName", string.Empty);
-            }
-
             //isDataLoaded = false;
             Data.Clear();
 
-            var data = await DatabaseService.GetDataAsync();
-            foreach (var d in data)
+
+            // Hol die gespeicherten Track-Namen aus den Einstellungen
+            var selectedTracks = Preferences.Get("SelectedTracks", string.Empty)
+                                            .Split(',')
+                                            .Select(t => t.Trim())
+                                            .ToList();
+
+
+            allData = (await DatabaseService.GetDataAsync()).Where(x => selectedTracks.Contains(x.TrackName)).ToList();
+            foreach (var d in allData)
             {
-                if (ParkrunnerName.ToLower() == d.Name.ToLower())
+                if (ParkrunnerName.ToLower().Trim() == d.Name.ToLower())
                 {
                     Data.Add(d);
                     await Task.Delay(Delay); //kleine Pause gibt der UI Zeit zum Rendern
@@ -138,19 +170,14 @@ namespace Parkrun_View.MVVM.ViewModels
 
             //isDataLoaded = true;
 
-            // Jetzt füge die zwischengespeicherten neuen Einträge hinzu
-            //foreach (var pending in pendingEntries)
-            //{
-            //    if (ParkrunnerName.ToLower() != pending.Name.ToLower())
-            //        Data.Add(pending);
-            //}
-            //pendingEntries.Clear(); // Warteschlange leeren
-
             SetContentVisibility();
 
             // Wenn die Daten geladen wurden, dann wird der Lade-Spinner deaktiviert
             isDataAvailable = true;
             isFetchDataFromDatabase = false;
+
+            // Speichern in Preferences
+            Preferences.Set("ParkrunnerName", parkrunnerName.ToLower().Trim());
         }
 
         /// <summary>
@@ -172,35 +199,21 @@ namespace Parkrun_View.MVVM.ViewModels
 
         public ParkrunViewModel()
         {
-            NavigationHelper.LoadFilteredParkrunDataSync(); // Lädt die gefilterten Daten von der Datenbank, die von anderen ViewModels verwendet werden können.
-            Data = NavigationHelper.Data; // Verweis auf die Daten, die von der Datenbank geladen wurden. Wird in der NavigationHelper-Klasse gespeichert, um von anderen ViewModels darauf zuzugreifen. 
+            //NavigationHelper.LoadFilteredParkrunDataSync(); // Lädt die gefilterten Daten von der Datenbank, die von anderen ViewModels verwendet werden können.
+            //Data = NavigationHelper.Data; // Verweis auf die Daten, die von der Datenbank geladen wurden. Wird in der NavigationHelper-Klasse gespeichert, um von anderen ViewModels darauf zuzugreifen. 
 
-            //AddDataCommand = new Command(async () =>
-            //{
-            //    var parkrunData = new ParkrunData { Date = SelectedDate, Time = SelectedTime, DistanceKm = 5 };
+            // Initialisere den Namen, wenn schon einer gespeichert wurde.
+            if (Preferences.Get("ParkrunnerName", string.Empty) != string.Empty)
+            {
+                ParkrunnerName = Preferences.Get("ParkrunnerName", string.Empty);
+            }
+            else
+            {
+                Preferences.Set("ParkrunnerName", "");
+                ParkrunnerName = Preferences.Get("ParkrunnerName", string.Empty);
+            }
 
-            //    await DatabaseService.SaveDataAsync(parkrunData);
-
-            //    if (isDataLoaded)
-            //    {
-            //        Data.Add(parkrunData);
-            //    }
-            //    else
-            //    {
-            //        pendingEntries.Add(parkrunData);        // Speichere das neue Element temporär, so dass es nach dem Laden der Daten von der Datenbank in der "LoadDataAsync" hinzugefügt wird.
-            //    }
-
-            //    Data = new ObservableCollection<ParkrunData>(Data.OrderBy(d => d.Date));
-            //});
-
-            //RemoveDataCommand = new Command<ParkrunData>(async (parkrunData) =>
-            //{
-            //    if (parkrunData != null)
-            //    {
-            //        await DatabaseService.DeleteDataAsync(parkrunData);
-            //        Data.Remove(parkrunData);
-            //    }
-            //});
+            SelectedEntry = ParkrunnerName;
 
             ToogleUpdateButtonCommand = new Command(async () =>
             {
@@ -249,6 +262,26 @@ namespace Parkrun_View.MVVM.ViewModels
                 }
             });
 
+            SuggestionUpdateCommand = new Command(() =>
+            {
+                SuggestionUpdate();
+            });
+
+            void SuggestionUpdate()
+            {
+                if (String.IsNullOrEmpty(ParkrunnerName))
+                {
+                    SuggestionList = new ObservableCollection<string>();
+                    return;
+                }
+
+                SuggestionList = new ObservableCollection<string>(allData
+               .Where(d => d.Name.StartsWith(ParkrunnerName, StringComparison.OrdinalIgnoreCase))
+               .Select(d => d.Name)
+               .OrderBy(name => name)
+               .Distinct()
+               .Take(2));
+            }
 
             if (Preferences.Get("ParkrunnerName", string.Empty) != string.Empty)
             {
@@ -260,6 +293,7 @@ namespace Parkrun_View.MVVM.ViewModels
             else
                 UpdateDatabaseButtonText = cancelUpdateText; // Wenn der Button gedrückt wird, dann wird der Text auf "Aktualisiere Datenbank" geändert.
 
+            SuggestionList = new ObservableCollection<string>();
         }
 
         int datacount = 0; // Variable, um die Anzahl der Datensätze zu zählen, die von der Webseite extrahiert wurden. Wird für den Fortschritt benötigt.
@@ -412,9 +446,9 @@ namespace Parkrun_View.MVVM.ViewModels
             if (!isURLValid) // Wenn das Scrappen nicht erfolgreich war
             {
                 //ParkrunInfo = "Es konnte keine Verbindung zur Webseite aufgebaut werden.";
-                if (Application.Current?.MainPage != null)
+                if (Application.Current?.Windows[0].Page != null)
                 { 
-                    await Application.Current.MainPage.DisplayAlert("Fehler", "Es konnte keine Verbindung zur Webseite aufgebaut werden.", "OK");
+                    await Application.Current?.Windows[0].Page.DisplayAlert("Fehler", "Es konnte keine Verbindung zur Webseite aufgebaut werden.", "OK");
                     isNewDataAvailable = false; // Setze den Status auf "Keine neuen Daten verfügbar"
                 }
 
@@ -422,9 +456,9 @@ namespace Parkrun_View.MVVM.ViewModels
             else if (!isScrappingSuccess)
             {
                 //ParkrunInfo = "Es sind keine neuen Daten vorhanden.";
-                if (Application.Current?.MainPage != null)
+                if (Application.Current?.Windows[0].Page != null)
                 {
-                    await Application.Current.MainPage.DisplayAlert("Hinweis", "Es sind keine neuen Daten vorhanden.", "OK");
+                    await Application.Current?.Windows[0].Page.DisplayAlert("Hinweis", "Es sind keine neuen Daten vorhanden.", "OK");
                     isNewDataAvailable = false; // Setze den Status auf "Keine neuen Daten verfügbar"
                 }
 
@@ -432,13 +466,13 @@ namespace Parkrun_View.MVVM.ViewModels
             else if (isScrappingSuccess) // Wenn das Scrappen erfolgreich war
             {
                 //ParkrunInfo = "Die Datenbank wurde erfolgreich aktualisiert. Es sind " + (totalRuns - currentParkrunNr) + " neue Daten vorhanden.";
-                if (Application.Current?.MainPage != null)
+                if (Application.Current?.Windows[0].Page != null)
                 {
                     string message = datacount == 1
                         ? $"Die Datenbank wurde erfolgreich aktualisiert. Es ist {datacount} neuer Datensatz vorhanden."
                         : $"Die Datenbank wurde erfolgreich aktualisiert. Es sind {datacount} neue Datensätze vorhanden.";
 
-                    await Application.Current.MainPage.DisplayAlert("Hinweis", message, "OK");
+                    await Application.Current?.Windows[0].Page.DisplayAlert("Hinweis", message, "OK");
                 }
             }
 
@@ -523,8 +557,8 @@ namespace Parkrun_View.MVVM.ViewModels
             }
             catch (TaskCanceledException)
             {
-                if (Application.Current?.MainPage != null)
-                    await Application.Current.MainPage.DisplayAlert("Hinweis", taskCanceledText, "OK");
+                if (Application.Current?.Windows[0].Page != null)
+                    await Application.Current.Windows[0].Page.DisplayAlert("Hinweis", taskCanceledText, "OK");
             }
         }
         

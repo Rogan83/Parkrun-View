@@ -27,11 +27,6 @@ public partial class ParkrunPage : ContentPage
         {
             parkrunViewModel.FontSize = Preferences.Get("selectedFontSize", 16.0); // Schriftgröße aus den Einstellungen laden
             parkrunViewModel.Data = new ObservableCollection<ParkrunData>();
-            //foreach (var d in NavigationHelper.Data)
-            //{
-            //    parkrunViewModel.Data.Add(d);
-            //    await Task.Delay(parkrunViewModel.Delay); //kleine Pause gibt der UI Zeit zum Rendern
-            //}
 
             await parkrunViewModel.LoadDataAsync();
             parkrunViewModel.SetContentVisibility();

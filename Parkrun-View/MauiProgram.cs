@@ -1,6 +1,8 @@
-﻿using Microcharts.Maui;
+﻿using CommunityToolkit.Maui;
+using Microcharts.Maui;
 using Microsoft.Extensions.Logging;
 using SkiaSharp.Views.Maui.Controls.Hosting;
+using zoft.MauiExtensions.Controls;
 
 namespace Parkrun_View
 {
@@ -13,6 +15,8 @@ namespace Parkrun_View
                 .UseMauiApp<App>()
                 .UseSkiaSharp()  
                 .UseMicrocharts()
+                .UseMauiCommunityToolkit()
+                .UseZoftAutoCompleteEntry()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");

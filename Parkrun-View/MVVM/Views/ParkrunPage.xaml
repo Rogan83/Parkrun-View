@@ -4,6 +4,7 @@
              xmlns:viewModels="clr-namespace:Parkrun_View.MVVM.ViewModels"
              xmlns:microcharts="clr-namespace:Microcharts.Maui;assembly=Microcharts.Maui"
              x:Class="Parkrun_View.MVVM.Views.ParkrunPage"
+             xmlns:zoft="http://zoft.MauiExtensions/Controls"
              Title="">
     <ContentPage.ToolbarItems>
         <ToolbarItem IconImageSource="parkrunlogo.png" />
@@ -11,9 +12,24 @@
     <Grid RowDefinitions="auto,*,auto" Padding="0" ColumnDefinitions="1*,1*,1*" HorizontalOptions="Center" >
             <Grid ColumnDefinitions="1*,1*,auto" Margin="5" HorizontalOptions="Fill" Grid.ColumnSpan="3">
                 <!-- Oberer Bereich für Datum und Zeitwahl -->
-                <Entry Text="{Binding ParkrunnerName}" Placeholder="Bitte Namen eintragen" Margin="10" 
-                   HorizontalOptions="Center" Grid.Column="0" FontSize="{Binding FontSize}"/>
-                <Button Text ="Lade Daten"  Command="{Binding LoadDataCommand}" Margin="10" BackgroundColor ="Green" 
+                <!--<Entry Text="{Binding ParkrunnerName}" Placeholder="Bitte Namen eintragen" Margin="10" 
+                   HorizontalOptions="Center" Grid.Column="0" FontSize="{Binding FontSize}"/>-->
+            <zoft:AutoCompleteEntry
+                Margin="10"
+                HorizontalOptions="Center"
+                Grid.Column="0"
+                FontSize="{Binding FontSize}"
+                Placeholder="Name"
+                
+                Text ="{Binding ParkrunnerName}"
+                ItemsSource="{Binding SuggestionList}"
+                TextChangedCommand="{Binding SuggestionUpdateCommand}"
+                SelectedSuggestion="{Binding SelectedEntry}"
+                DisplayMemberPath="."
+                HeightRequest="50" 
+                WidthRequest="200"/>
+
+            <Button Text ="Lade Daten"  Command="{Binding LoadDataCommand}" Margin="10" BackgroundColor ="Green" 
                     HorizontalOptions="Center" Grid.Column="1" FontSize="{Binding FontSize}"/>
                 <ImageButton 
                     Margin="10"
