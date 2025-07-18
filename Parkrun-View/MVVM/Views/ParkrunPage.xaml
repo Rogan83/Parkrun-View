@@ -9,6 +9,14 @@
     <ContentPage.ToolbarItems>
         <ToolbarItem IconImageSource="parkrunlogo.png" />
     </ContentPage.ToolbarItems>
+
+    <ContentPage.Background>
+        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="{StaticResource BackgroundColorStart}" Offset="0.0" />
+            <GradientStop Color="{StaticResource BackgroundColorEnd}" Offset="1.0" />
+        </LinearGradientBrush>
+    </ContentPage.Background>
+
     <Grid RowDefinitions="auto,*,auto" Padding="0" ColumnDefinitions="1*,1*,1*" HorizontalOptions="Center" >
             <Grid ColumnDefinitions="1*,1*,auto" Margin="5" HorizontalOptions="Fill" Grid.ColumnSpan="3">
                 <!-- Oberer Bereich für Datum und Zeitwahl -->

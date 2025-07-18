@@ -27,6 +27,24 @@
     <Color x:Key="Gray600">#404040</Color>
     <Color x:Key="Gray900">#212121</Color>
     <Color x:Key="Gray950">#141414</Color>
+    
+    
+    
+    <!--Eigene Farben-->
+    
+    <!--Hintergrundfarben von der App-->
+    <Color x:Key="BackgroundColorStart">#0E4A4C</Color>
+    <Color x:Key="BackgroundColorEnd">#4682B4</Color>
+    <Color x:Key="BackgroundColorBorder">#00FFFF</Color>
+    
+    <!--Linechart Farben-->
+    <Color x:Key="BackgroundColorLineChart">#D0F8FF</Color>
+    <!--Schriftfarben-->
+    <Color x:Key="FontColor">#00CED1</Color>
+    <!--Aktivitäts Indikator (LadeKreis)-->
+    <Color x:Key="ActivityIndicator">#006400</Color>
+
+
 
     <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}"/>
     <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource Secondary}"/>

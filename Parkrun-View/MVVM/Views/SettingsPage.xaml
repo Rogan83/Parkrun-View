@@ -8,10 +8,17 @@
     <ContentPage.ToolbarItems>
         <ToolbarItem IconImageSource="parkrunlogo.png" />
     </ContentPage.ToolbarItems>
-    
+
+    <ContentPage.Background>
+        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="{StaticResource BackgroundColorStart}" Offset="0.0" />
+            <GradientStop Color="{StaticResource BackgroundColorEnd}" Offset="1.0" />
+        </LinearGradientBrush>
+    </ContentPage.Background>
+
     <Grid RowDefinitions="auto,*,auto,auto,auto,auto">
         <Label Text="Wähle hier deine Strecken aus, die dich interessieren" HorizontalOptions="Center" Margin="10" FontSize="Large"/>
-        <Border Grid.Row="1" Padding="10" StrokeThickness="20" Stroke="DimGrey">
+        <Border Grid.Row="1" Padding="10" StrokeThickness="20" Stroke="{StaticResource BackgroundColorBorder}">
             <ScrollView 
                 VerticalScrollBarVisibility ="Always"
                 Margin="0">

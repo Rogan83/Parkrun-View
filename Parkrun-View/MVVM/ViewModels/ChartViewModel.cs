@@ -147,13 +147,14 @@ namespace Parkrun_View.MVVM.ViewModels
                     {
                         Label = label,
                         ValueLabel = valueLabel,
-                        Color = color // Dynamische Farbänderung basierend auf der Bedingung
+                        Color = color, // Dynamische Farbänderung basierend auf der Bedingung
                     };
+                    
                 }).ToList();
             }
 
             #region TestData
-            
+
             //var entries = new List<ChartEntry>
             //{
 
@@ -163,6 +164,8 @@ namespace Parkrun_View.MVVM.ViewModels
             //    new ChartEntry(500) { Label = "Do", ValueLabel = "500", Color = SKColor.Parse("#FFD700") },
             //};
             #endregion
+            var backgroundColor = Application.Current?.Resources["BackgroundColorLineChart"] as Color;
+            var skiaBackgroundColor = backgroundColor != null ? SKColor.Parse(backgroundColor.ToHex()) : SKColors.White; // Hintergrundfarbe des Diagramms, falls nicht gesetzt, wird weiß verwendet
 
             LineChart = new LineChart
             {
@@ -170,9 +173,7 @@ namespace Parkrun_View.MVVM.ViewModels
                 LabelOrientation = Orientation.Horizontal,
                 ValueLabelOrientation = Orientation.Horizontal,
                 LabelTextSize = (float)FontSize * 2,
-
-                //MaxValue = 1000,  // Höchster Wert ein wenig über deinem höchsten Punkt setzen
-                //MinValue = 0   // Niedrigster Wert nahe deinem kleinsten Punkt setzen
+                BackgroundColor = skiaBackgroundColor
             };
 
 
