@@ -28,10 +28,8 @@ namespace Parkrun_View
                 if (currentPage?.BindingContext is ILoadableViewModel vm)
                 {
                     vm.IsLoading = true; // Zeigt einen Ladeindikator an, während die Daten geladen werden
-
                     await NavigationHelper.LoadFilteredParkrunDataAsync();
-
-                    vm.IsLoading = false; // Zeigt einen Ladeindikator an, während die Daten geladen werden
+                    vm.IsLoading = false; // deaktiviert diesen wieder
                 }
             }
 

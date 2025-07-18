@@ -27,13 +27,6 @@ namespace Parkrun_View.MVVM.ViewModels
     {
         #region Properties and Fields
 
-        //Text="{Binding ParkrunnerName}"
-        //        ItemsSource="{Binding VorschlagsListe}"
-        //        TextChangedCommand="{Binding VorschlagAktualisierenCommand}"
-        //        SelectedSuggestion="{Binding AusgewählterEintrag}"
-        //        Completed="AutoCompleteEntry_Completed"
-        //        HeightRequest="50" />
-
         public ObservableCollection<ParkrunData> Data { get; set; } = new();
 
         public ObservableCollection<string> SuggestionList { get; set; } = new();
@@ -69,7 +62,7 @@ namespace Parkrun_View.MVVM.ViewModels
                 }
             }
         }
-
+        bool isSelectedEntryTriggeredByConstructor = false;           // Das erste mal wird das Entry durch den Konstruktor getriggert. Da soll aber die Methode LoadDataAsync nicht hier ausgeführt werden, da es noch in der OnAppearing von der XAML ebenfalls ausgeführt wird. Das führt dazu, dass diese Methode 2 mal ausgeführt wird => Die Daten werden doppelt in der Data Liste hinzugefügt. Deswegen soll nach dem Starten des Programms diese Methode anfangs nicht ausgeführt werden.
         private string selectedEntry;
         public string SelectedEntry
         {
@@ -80,7 +73,11 @@ namespace Parkrun_View.MVVM.ViewModels
                 {
                     selectedEntry = value;
 
-                    _ = LoadDataAsync();
+                    if (!isSelectedEntryTriggeredByConstructor)     // Soll nur ausgeführt werden, wenn es durch die Auswahl des Namens getriggert wurde, nicht durch den Konstuktor. Da der Konstuktor nur einmal pro Programmstart ausgeführt wird, kann diese Methode beim zweiten mal ausführen immer ausgeführt werden.
+                    {
+                        _ = LoadDataAsync();
+                    }
+                    isSelectedEntryTriggeredByConstructor = false;
 
                     // Automatisches Speichern in Preferences
                     Preferences.Set("ParkrunnerName", parkrunnerName.ToLower().Trim());
@@ -159,8 +156,10 @@ namespace Parkrun_View.MVVM.ViewModels
 
 
             allData = (await DatabaseService.GetDataAsync()).Where(x => selectedTracks.Contains(x.TrackName)).ToList();
+            int i = 0;
             foreach (var d in allData)
             {
+                i++;
                 if (ParkrunnerName.ToLower().Trim() == d.Name.ToLower())
                 {
                     Data.Add(d);
@@ -213,6 +212,7 @@ namespace Parkrun_View.MVVM.ViewModels
                 ParkrunnerName = Preferences.Get("ParkrunnerName", string.Empty);
             }
 
+            isSelectedEntryTriggeredByConstructor = true;       // Setzt den Status, dass das Entry durch den Konstruktor getriggert wurde. Dadurch wird verhindert, dass die Methode LoadDataAsync() beim Setzen des Namens im Konstruktor ausgeführt wird. Diese Methode wird dann in der OnAppearing-Methode der XAML-Datei ausgeführt, um die Daten zu laden, welche auch immer beim Seitenwechsel ausgeführt wird.
             SelectedEntry = ParkrunnerName;
 
             ToogleUpdateButtonCommand = new Command(async () =>

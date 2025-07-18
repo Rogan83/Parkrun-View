@@ -134,9 +134,9 @@ namespace Parkrun_View.MVVM.ViewModels
                     }
                     else
                     {
-                        color = SKColor.Parse("#f1c40f"); // Gelb für normale Zeiten
+                        color = SKColor.Parse("#f1c40f"); // Gelb für die anderen Zeiten
                     }
-                    // Wenn die Detailansicht aktiv ist oder die Breite von der kompletten Ansicht kleiner als die maximale Breite ist, dann wird das Datum und die Zeit angezeigt
+                    // Wenn die Detailansicht aktiv ist oder die Breite von der kompletten Ansicht kleiner als die maximale Breite ist, dann wird das Datum und die Zeit angezeigt. Sonst nicht, da das Datum und die Zeit zu wenig Platz hätte
                     if (!isCompactView || expandedChartWidth <= maxChartWidth)
                     {
                         label = result.Date.ToShortDateString();
@@ -196,7 +196,7 @@ namespace Parkrun_View.MVVM.ViewModels
                     dataPointWidth = 150;
                 }
                 maxChartWidth = adjustedWidth;  // Maximale Breite, die der Linechart haben darf, damit alle Infos zu jeden Datenpunkt vollständig auf eine Seite zu sehen sind für die kompakte Ansicht.
-
+                                                // Wird durch die Kalkulation in CalculateAdjustedDimensionsForSmartphone() bzw. CalculateAdjustedDimensionsForPC() ermittelt
                 expandedChartWidth = DataPeriod.Count * dataPointWidth;   // Die Gesamtbreite des Diagramms, welches mit einem horizontalen Balken angeschaut werden kann, wird anhand der Anzahl der Datenpunkte und der Breite pro Datenpunkt berechnet.
 
                 if (isCompactView)
@@ -244,8 +244,6 @@ namespace Parkrun_View.MVVM.ViewModels
                     }
                 }
             }
-
-
         }
 
         bool isInitPeriod = false; // Flag, ob die Periode bereits initialisiert wurde
