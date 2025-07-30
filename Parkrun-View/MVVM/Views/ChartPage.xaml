@@ -16,7 +16,7 @@
     </ContentPage.Background>
 
 
-    <Grid RowDefinitions="auto,auto,auto,auto">
+    <Grid RowDefinitions="auto,auto,auto,auto,auto">
         <VerticalStackLayout  Grid.Row="0" >
             <Grid ColumnDefinitions="3*,1*" HorizontalOptions="Center">
                 <!--<Label 
@@ -52,7 +52,7 @@
                     Command="{Binding GoToSettingsCommand}"
                     />
             </Grid>
-
+            
 
         </VerticalStackLayout>
 
@@ -89,5 +89,11 @@
         <ActivityIndicator Grid.Row="3" IsVisible="{Binding IsLoading}" 
                IsRunning="{Binding IsLoading}" 
                Color="DarkGreen"/>
+        
+        <Label Grid.Row="4"
+            Text="{Binding Info}"
+            IsVisible="{Binding isInfoVisible}"
+            BackgroundColor="IndianRed"
+            />
     </Grid>
 </ContentPage>

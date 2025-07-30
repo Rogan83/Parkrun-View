@@ -155,11 +155,13 @@ namespace Parkrun_View.MVVM.ViewModels
                                             .ToList();
 
 
-            allData = (await DatabaseService.GetDataAsync()).Where(x => selectedTracks.Contains(x.TrackName)).ToList();
-            int i = 0;
+            allData = (await DatabaseService.GetDataAsync())
+                .Where(x => selectedTracks.Contains(x.TrackName))   // filtere die Daten nach den ausgewählten Tracks
+                .OrderBy(x => x.Date)                               // und sortiere die Daten nach Datum
+                .ToList();
+
             foreach (var d in allData)
             {
-                i++;
                 if (ParkrunnerName.ToLower().Trim() == d.Name.ToLower())
                 {
                     Data.Add(d);

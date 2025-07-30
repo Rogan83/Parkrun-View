@@ -10,18 +10,27 @@ using Microcharts;
 using SkiaSharp;
 using Parkrun_View.MVVM.Helpers;
 using Parkrun_View.Services;
-using Parkrun_View.MVVM.Interfaces;        // Wird für die Grafiken benötigt
+using Parkrun_View.MVVM.Interfaces;
+using System.Reflection.Metadata.Ecma335;        // Wird für die Grafiken benötigt
+
+
+// todo:
+
 
 namespace Parkrun_View.MVVM.ViewModels
 {
     [AddINotifyPropertyChangedInterface]
     internal class ChartViewModel : ILoadableViewModel
     {
+        #region Properties and Fields
         public List<ParkrunData> Data { get; set; } = new List<ParkrunData>();
         public List<ParkrunData> DataPeriod { get; set; } = new List<ParkrunData>();        // Daten, die für die aktuelle Periode ausgewählt wurden
         public Chart LineChart { get; private set; }
 
         public double FontSize { get; set; } = 16;
+
+        private bool isFilterDataByPeriod = true;  // Flag, ob die Daten nach Periode gefiltert werden sollen. Wird auf false gesetzt, wenn die Daten bereits gefiltert wurden und nicht erneut gefiltert werden sollen.
+        private bool isSetDateStart = true;
 
         private DateTime dateStart;
 
@@ -30,8 +39,11 @@ namespace Parkrun_View.MVVM.ViewModels
             get => dateStart; 
             set 
             {
+                isSetDateStart = true; 
+
                 dateStart = value;
-                FilterDataByPeriod();
+                if (isFilterDataByPeriod)
+                    FilterDataByPeriod();
             } 
         }
 
@@ -42,8 +54,11 @@ namespace Parkrun_View.MVVM.ViewModels
             get => dateEnd;
             set
             {
+                isSetDateStart = false;
+
                 dateEnd = value;
-                FilterDataByPeriod();
+                if (isFilterDataByPeriod)
+                    FilterDataByPeriod();
             }
         }
 
@@ -55,13 +70,17 @@ namespace Parkrun_View.MVVM.ViewModels
         bool isCompactView = false;
         public string IsCompleteLabelName { get; set; } = "Detailansicht"; // Label für die Ansicht
 
+        public string Info { get; set; }
+        public bool isInfoVisible { get; set; } = true;
+
         // Wenn keine Daten vorhanden sind, dann sollen die Flags dementsprechend zugewiesen werden und der passende Text dazu in der dazugehörigen xaml ausgegeben werden.
         public bool isDataEmpty { get; set; }
         public bool isDataAvailable { get; set; }
 
         public bool IsLoading { get; set; }
+        #endregion
 
-
+        #region Commands
         public ICommand ToggleViewModus { get; set; }
       
         public ICommand GoToSettingsCommand { get; } = NavigationHelper.GoToSettingsCommand;
@@ -93,7 +112,9 @@ namespace Parkrun_View.MVVM.ViewModels
 
         int expandedChartWidth = 0; // Breite der Detailansicht
 
+        #endregion
 
+        int maxDataPoints = 0;
 
         /// <summary>
         /// Aktualisiert das Diagramm.
@@ -198,7 +219,6 @@ namespace Parkrun_View.MVVM.ViewModels
                 }
                 maxChartWidth = adjustedWidth;  // Maximale Breite, die der Linechart haben darf, damit alle Infos zu jeden Datenpunkt vollständig auf eine Seite zu sehen sind für die kompakte Ansicht.
                                                 // Wird durch die Kalkulation in CalculateAdjustedDimensionsForSmartphone() bzw. CalculateAdjustedDimensionsForPC() ermittelt
-                expandedChartWidth = DataPeriod.Count * dataPointWidth;   // Die Gesamtbreite des Diagramms, welches mit einem horizontalen Balken angeschaut werden kann, wird anhand der Anzahl der Datenpunkte und der Breite pro Datenpunkt berechnet.
 
                 if (isCompactView)
                 {
@@ -206,8 +226,109 @@ namespace Parkrun_View.MVVM.ViewModels
                 }
                 else
                 {
+                    //10000 datenpunkte müssten auf jedenfall gehen
+                    maxDataPoints = 6000 / dataPointWidth; // Maximale Anzahl der Datenpunkte, die auf dem Bildschirm angezeigt werden sollen
+
+                    if (DataPeriod.Count > maxDataPoints)
+                    {
+                        if (isSetDateStart)
+                        {
+                            int currentIndexDateStart = Data.FindIndex(dp => dp.Date == dateStart);
+                            if (currentIndexDateStart == -1)        // Falls das ausgesuchte Datum nicht gefunden wird, dann wird nach dem nächstgrößeren - oder nächstkleineren Datum gesucht
+                            {
+                                // Suche das nächstgrößere Datum
+                                var next = Data
+                                    .Where(dp => dp.Date > dateStart)
+                                    .OrderBy(dp => dp.Date)
+                                    .FirstOrDefault();
+
+                                if (next != null)
+                                {
+                                    currentIndexDateStart = Data.IndexOf(next);
+                                }
+                                else
+                                {
+                                    // Kein größeres Datum vorhanden 
+                                    next = Data
+                                    .Where(dp => dp.Date < dateStart)
+                                    .OrderBy(dp => dp.Date)
+                                    .FirstOrDefault();
+
+                                    if (next == null)
+                                    {
+                                        currentIndexDateStart = 0;
+                                    }
+                                }
+                            }
+
+                            int indexDateEnd = Math.Min(Data.Count, currentIndexDateStart + maxDataPoints);
+
+                            isFilterDataByPeriod = false; // Daten sollen hier nicht erneut gefiltert werden, nachdem DateEnd gesetzt wird.
+                            DateStart = Data[currentIndexDateStart].Date;
+                            isFilterDataByPeriod = true;
+
+                            isFilterDataByPeriod = false; // Daten sollen hier nicht erneut gefiltert werden, nachdem DateEnd gesetzt wird.
+                            DateEnd = Data[indexDateEnd].Date; // Letztes Datum der Datenpunkte, wenn DateStart nicht gesetzt ist
+                            isFilterDataByPeriod = true; 
+
+                            DataPeriod = Data.Skip(currentIndexDateStart).Take(maxDataPoints).ToList(); // Beschränkung der Datenpunkte auf die maximale Anzahl
+                        }
+                        else // muss auch noch angepasst werden
+                        {
+                            int currentIndexDateEnd = Data.FindIndex(dp => dp.Date == dateEnd);
+                            if (currentIndexDateEnd == -1)        // Falls das ausgesuchte Datum nicht gefunden wird, dann wird nach dem nächstgrößeren - oder nächstkleineren Datum gesucht
+                            {
+                                // Suche das nächstkleinere Datum
+                                var next = Data
+                                    .Where(dp => dp.Date < dateEnd)
+                                    .OrderByDescending(dp => dp.Date)
+                                    .FirstOrDefault();
+
+                                if (next != null)
+                                {
+                                    currentIndexDateEnd = Data.IndexOf(next);
+                                }
+                                else
+                                {
+                                    // Kein größeres Datum vorhanden 
+                                    next = Data
+                                    .Where(dp => dp.Date < dateEnd)
+                                    .OrderByDescending(dp => dp.Date)
+                                    .FirstOrDefault();
+
+                                    if (next == null)
+                                    {
+                                        currentIndexDateEnd = 0;
+                                    }
+                                }
+                            }
+
+                            int indexDateStart = Math.Max(0, currentIndexDateEnd - maxDataPoints);
+
+                            isFilterDataByPeriod = false; // Daten sollen hier nicht erneut gefiltert werden, nachdem DateEnd gesetzt wird.
+                            DateStart = Data[indexDateStart].Date; // Letztes Datum der Datenpunkte, wenn DateStart nicht gesetzt ist
+                            isFilterDataByPeriod = true;
+
+                            isFilterDataByPeriod = false; // Daten sollen hier nicht erneut gefiltert werden, nachdem DateEnd gesetzt wird.
+                            DateEnd = Data[currentIndexDateEnd].Date;
+                            isFilterDataByPeriod = true;
+
+                            DataPeriod = Data.Skip(indexDateStart).Take(maxDataPoints).ToList(); // Starte erst bei dem Datensatz mit dem Startdatum und nehme nur maximal eine bestimmte Menge an Datensätze
+                        }
+
+                        Info = $"Die Datenmenge ist zu groß, um sie vollständig anzuzeigen. Es werden nur die Zeiten vom {DateStart.ToString("dd.MM.yyyy")} bis {DateEnd.ToString("dd.MM.yyyy")} angezeigt.";   // Info-Text, wenn die Datenmenge zu groß ist
+                        isInfoVisible = true; // Info-Text wird angezeigt, wenn die Datenmenge zu groß ist
+                    }
+                    else
+                    {
+                        Info = ""; //Wenn die Datenmenge nicht zu groß ist, dann brauch auch keine Info ausgegeben werden.
+                        isInfoVisible = false; // Info-Text wird nicht angezeigt, wenn die Datenmenge nicht zu groß ist
+                    }
+
+                    expandedChartWidth = DataPeriod.Count * dataPointWidth;   // Die Gesamtbreite des Diagramms, welches mit einem horizontalen Balken angeschaut werden kann, wird anhand der Anzahl der Datenpunkte und der Breite pro Datenpunkt berechnet.
+
                     // Mindestbreite festlegen und je nach Datenzahl skalieren
-                    ChartWidth = Math.Max(adjustedWidth, expandedChartWidth);  // Pro Datenpunkt 50 Pixel Breite
+                    ChartWidth = Math.Max(adjustedWidth, expandedChartWidth); 
                 }
 
                 // Wenn die Anzahl der Datenpunkte und die daraus resultierende Gesamtbreite für das Liniendiagramm zu hoch ist,
@@ -246,6 +367,7 @@ namespace Parkrun_View.MVVM.ViewModels
                 }
             }
         }
+
 
         bool isInitPeriod = false; // Flag, ob die Periode bereits initialisiert wurde
         public void InitPeriod()
@@ -287,7 +409,7 @@ namespace Parkrun_View.MVVM.ViewModels
 
             if (Data.Count > 0)
             {
-                DataPeriod = Data.Where(d => d.Date >= DateStart && d.Date <= DateEnd).ToList();
+                DataPeriod = Data.Where(d => d.Date >= dateStart && d.Date <= dateEnd).ToList();
                 UpdateChart();
             }
 

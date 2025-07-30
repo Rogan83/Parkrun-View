@@ -28,8 +28,8 @@ public partial class ChartPage : ContentPage
             chartViewModel.FontSize = Preferences.Get("selectedFontSize", 16.0); // Schriftgröße aus den Einstellungen laden
             chartViewModel.DataPeriod = chartViewModel.Data = NavigationHelper.Data.ToList(); // Verweis auf die Daten, die von der Datenbank geladen wurden. Wird in der NavigationHelper-Klasse gespeichert, um von anderen ViewModels darauf zuzugreifen.
 
-            chartViewModel.UpdateChart();
             chartViewModel.InitPeriod();
+            chartViewModel.UpdateChart();
             chartViewModel.SetContentVisibility();
         }
     }
